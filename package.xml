@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<package>
+  <name>offboard_drone</name>
+  <version>0.1.0</version>
+  <description>Hanseob px4 based offboard code</description>
+  <maintainer email="hslee89@kaist.ac.kr">hanseob</maintainer>
+
+  <license>BSD</license>
+
+  <url type="website">http://www.unmanned.kaist.co.kr/DCUlab_main</url>
+  <author email="hslee89@kaist.ac.kr">hanseob</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>geometry_msgs</build_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>tf</build_depend>
+  <build_depend>rospy</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+  <build_depend>opencv2</build_depend>
+  <run_depend>geometry_msgs</run_depend>
+  <run_depend>roscpp</run_depend>
+  <run_depend>tf</run_depend>
+  <run_depend>std_msgs</run_depend>
+  <run_depend>sensor_msgs</run_depend>
+  <run_depend>rospy</run_depend>
+  <run_depend>opencv2</run_depend>
+
+  <export>
+  </export>
+</package>
+
