@@ -2,7 +2,8 @@ cmake_minimum_required(VERSION 2.8.3)
 project(offboard_drone)
 
 #find_package(Boost COMPONENTS program_options REQUIRED)
-find_package(OpenCV 3.3 COMPONENTS core highgui imgproc REQUIRED)
+#find_package(OpenCV 3.3 COMPONENTS core highgui imgproc REQUIRED)
+find_package(OpenCV COMPONENTS core highgui imgproc REQUIRED)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
