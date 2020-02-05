@@ -184,6 +184,7 @@ void callback_state(const mavros_msgs::State::ConstPtr& msg)
 {
     g_current_state = *msg;
 
+    system("clear");
     std::cout << "\n[USRG] state_cb(), -----------";
     std::cout << "\n          g_current_state.connected = " << ((g_current_state.connected) ? "OK!" : "Not yet!");
     std::cout << "\n          g_current_state.armed     = " << ((g_current_state.armed ) ? "OK!" : "Not yet!");
