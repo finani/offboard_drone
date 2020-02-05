@@ -36,7 +36,7 @@
 using namespace cv;
 using namespace std;
 
-#include "SubtUtil_uav1.h"
+#include "SubtUtil_uav21.h"
 
 //#define  LOG_ON
 
@@ -245,7 +245,7 @@ void callback_odom(const nav_msgs::Odometry::ConstPtr& msg_input)
     tf::Transform transform;
     transform.setOrigin(tf::Vector3(Cur_Pos_m[0], Cur_Pos_m[1], Cur_Pos_m[2]));
     transform.setRotation(quat);
-    br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "map", "uav1"));
+    br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "map", "uav21"));
 
     flag_PosAvailable = 1;
 }
@@ -292,31 +292,31 @@ int main(int argc, char **argv)
     ros::NodeHandle nh_pub;
 
     // Subscribe Topic
-    ros::Subscriber state_sub     = nh_sub.subscribe ("/uav1/mavros/state" , 2,                         &callback_state);
-    //ros::Subscriber local_pos_sub = nh_sub.subscribe ("/uav1/mavros/local_position/pose", 2,            &callback_local_pos);
-    ros::Subscriber local_pos_sub = nh_sub.subscribe ("/uav1/odom" , 2,                                 &callback_odom);
-    ros::Subscriber local_tar_sub = nh_sub.subscribe ("/uav2/odom" , 2,                                 &callback_tar);
-    ros::Subscriber local_vel_sub = nh_sub.subscribe ("/uav1/mavros/local_position/velocity_local", 2,  &callback_local_vel);
-    ros::Subscriber cmd_sub       = nh_sub.subscribe ("/uav1/mavros_comm_node/tele_key/cmd_vel", 2,     &callback_cmd_vel);
-    ros::Subscriber flag_sub      = nh_sub.subscribe ("/uav1/mavros_comm_node/tele_key/flag", 2,        &callback_cmd_flag);
+    ros::Subscriber state_sub     = nh_sub.subscribe ("/uav21/mavros/state" , 2,                         &callback_state);
+    //ros::Subscriber local_pos_sub = nh_sub.subscribe ("/uav21/mavros/local_position/pose", 2,            &callback_local_pos);
+    ros::Subscriber local_pos_sub = nh_sub.subscribe ("/uav21/odom" , 2,                                 &callback_odom);
+    ros::Subscriber local_tar_sub = nh_sub.subscribe ("/uav22/odom" , 2,                                 &callback_tar);
+    ros::Subscriber local_vel_sub = nh_sub.subscribe ("/uav21/mavros/local_position/velocity_local", 2,  &callback_local_vel);
+    ros::Subscriber cmd_sub       = nh_sub.subscribe ("/uav21/mavros_comm_node/tele_key/cmd_vel", 2,     &callback_cmd_vel);
+    ros::Subscriber flag_sub      = nh_sub.subscribe ("/uav21/mavros_comm_node/tele_key/flag", 2,        &callback_cmd_flag);
 
-    ros::Subscriber astar_sub     = nh_sub.subscribe ("/uav1/astar_path_info", 2,                       &callback_astar_path);
-    ros::Subscriber goal_sub      = nh_sub.subscribe ("/uav1/GoalAction", 2,                            &callback_goal);
-    ros::Subscriber detection_sub = nh_sub.subscribe ("/uav1/detection", 2,                            &callback_detection);
+    ros::Subscriber astar_sub     = nh_sub.subscribe ("/uav21/astar_path_info", 2,                       &callback_astar_path);
+    ros::Subscriber goal_sub      = nh_sub.subscribe ("/uav21/GoalAction", 2,                            &callback_goal);
+    ros::Subscriber detection_sub = nh_sub.subscribe ("/uav21/detection", 2,                            &callback_detection);
 
     // Publish Topic
-    ros::Publisher  local_vel_pub = nh_pub.advertise<geometry_msgs::TwistStamped>("/uav1/mavros/setpoint_velocity/cmd_vel", 2);
+    ros::Publisher  local_vel_pub = nh_pub.advertise<geometry_msgs::TwistStamped>("/uav21/mavros/setpoint_velocity/cmd_vel", 2);
 
     path_uav_pub   = nh_pub.advertise<nav_msgs::Path>("uav_path",1);
     pos_cur_pub    = nh_pub.advertise<visualization_msgs::Marker>("uav_pos", 1);
     pos_tar_pub    = nh_pub.advertise<visualization_msgs::Marker>("uav_tar", 1);
     pos_pred_pub   = nh_pub.advertise<visualization_msgs::Marker>("uav_pred", 1);
 
-    ros::ServiceClient  arming_client    = nh_pub.serviceClient<mavros_msgs::CommandBool> ("/uav1/mavros/cmd/arming");
-    ros::ServiceClient  set_mode_client  = nh_pub.serviceClient<mavros_msgs::SetMode>     ("/uav1/mavros/set_mode");
+    ros::ServiceClient  arming_client    = nh_pub.serviceClient<mavros_msgs::CommandBool> ("/uav21/mavros/cmd/arming");
+    ros::ServiceClient  set_mode_client  = nh_pub.serviceClient<mavros_msgs::SetMode>     ("/uav21/mavros/set_mode");
 
     //the setpoint publishing rate MUST be faster than 2Hz
-    ros::Rate rate(20.0);
+    ros::Rate rate(30.0);
 
     // wait for FCU connection
     while(ros::ok() && g_current_state.connected){

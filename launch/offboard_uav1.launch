@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
 <launch>
 
-<arg name="robot_namespace" default="uav1"/>
+<arg name="robot_namespace" default="uav21"/>
 
   <group ns="$(arg robot_namespace)">
-	<node name="offboard_node_uav1" type="offboard_node_uav1" output="screen" pkg="offboard_drone">
+	<node name="offboard_node_uav21" type="offboard_node_uav21" output="screen" pkg="offboard_drone">
 		<param name="robot_namespace" value="$(arg robot_namespace)" />
 	</node>
   </group>

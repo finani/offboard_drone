@@ -50,11 +50,11 @@ include_directories(
 link_directories(${OpenCV_LIBRARY_DIRS})
 
 add_executable(
-	offboard_node_uav1
-	src/offboard_node_uav1.cpp)
+	offboard_node_uav21
+	src/offboard_node_uav21.cpp)
 
 target_link_libraries(
-	offboard_node_uav1
+	offboard_node_uav21
 	${catkin_LIBRARIES}
     ${OpenCV_LIBS}  
 )

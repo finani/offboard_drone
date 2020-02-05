@@ -1,6 +1,6 @@
 
-#ifndef SubtUtil_UAV1_H
-#define SubtUtil_UAV1_H
+#ifndef SubtUtil_UAV21_H
+#define SubtUtil_UAV21_H
 
 #define R2D	      180.0/3.141592653
 #define D2R	      3.141592653/180.0
