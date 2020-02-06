@@ -295,7 +295,7 @@ int main(int argc, char **argv)
     // Subscribe Topic
     ros::Subscriber state_sub     = nh_sub.subscribe ("/uav21/mavros/state" , 2,                         &callback_state);
     //ros::Subscriber local_pos_sub = nh_sub.subscribe ("/uav21/mavros/local_position/pose", 2,            &callback_local_pos);
-    ros::Subscriber local_pos_sub = nh_sub.subscribe ("/uav21/odom" , 2,                                 &callback_odom);
+    ros::Subscriber local_pos_sub = nh_sub.subscribe ("/uav21/mavros/global_position/local" , 2,                &callback_odom);
     ros::Subscriber local_tar_sub = nh_sub.subscribe ("/uav22/odom" , 2,                                 &callback_tar);
     ros::Subscriber local_vel_sub = nh_sub.subscribe ("/uav21/mavros/local_position/velocity_local", 2,  &callback_local_vel);
     ros::Subscriber cmd_sub       = nh_sub.subscribe ("/uav21/mavros_comm_node/tele_key/cmd_vel", 2,     &callback_cmd_vel);
@@ -571,7 +571,7 @@ void Mission_Update(void)
         case 11:
             Relative_WP_Flight();
             break;
-        
+
         default:
             cmd_x = 0.0;
             cmd_y = 0.0;
