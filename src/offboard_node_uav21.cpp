@@ -402,7 +402,7 @@ int main(int argc, char **argv)
             tele_flag.data[0] = 1;  // arming
             tele_flag.data[1] = 1;  // auto
         }
-
+/*
         if( g_current_state.mode != "OFFBOARD" && ((ros::Time::now() - last_request) > ros::Duration(1.0)))
         {
             if( set_mode_client.call(offb_set_mode) &&
@@ -443,11 +443,12 @@ int main(int argc, char **argv)
                 }
             }
         }
-
+*/
         //
         //printf("%d", subt_service.service);
 
-        if(flag_armed == 1)
+        //if(flag_armed == 1)
+	if(g_current_state.mode == "OFFBOARD")
         {
             //goal_service = 6;
             Mission_Update();

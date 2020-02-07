@@ -50,10 +50,10 @@
 #define flag_highlevel 1
 
 // for additional control
-#define PWM_ROL       1512
+#define PWM_ROL       1514
 #define PWM_PIT       1514
-#define PWM_THR       1530
-#define PWM_YAW       1516
+#define PWM_THR       1514
+#define PWM_YAW       1514
 #define PWM_LEN       420.0
 
 #define VELX_MAX      2.0
