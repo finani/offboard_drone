@@ -12,6 +12,7 @@
 #include <mavros_msgs/CommandBool.h>
 #include <mavros_msgs/SetMode.h>
 #include <mavros_msgs/State.h>
+#include <mavros_msgs/RCIn.h>
 
 #include <std_msgs/UInt8.h>
 #include <std_msgs/UInt8MultiArray.h>
@@ -68,6 +69,8 @@ std_msgs::Float32MultiArray    Detection;
 
 nav_msgs::Path path_cur;
 visualization_msgs::MarkerArray TargetArray;
+
+mavros_msgs::RCIn               rc_in;
 
 float   cmd_x = 0.0;
 float   cmd_y = 0.0;
@@ -178,6 +181,11 @@ void callback_detection(const std_msgs::Float32MultiArray::ConstPtr& msg)
     tar_data.size[1]     = msg->data[2];
     tar_data.impos[0]    = msg->data[3];
     tar_data.impos[1]    = msg->data[4];
+}
+
+void callback_rc_in(const mavros_msgs::RCIn::ConstPtr& msg)
+{
+    rc_in = *msg;
 }
 
 void callback_state(const mavros_msgs::State::ConstPtr& msg)
@@ -295,7 +303,7 @@ int main(int argc, char **argv)
     // Subscribe Topic
     ros::Subscriber state_sub     = nh_sub.subscribe ("/uav21/mavros/state" , 2,                         &callback_state);
     //ros::Subscriber local_pos_sub = nh_sub.subscribe ("/uav21/mavros/local_position/pose", 2,            &callback_local_pos);
-    ros::Subscriber local_pos_sub = nh_sub.subscribe ("/uav21/mavros/global_position/local" , 2,                &callback_odom);
+    ros::Subscriber local_pos_sub = nh_sub.subscribe ("/uav21/mavros/global_position/local" , 2,         &callback_odom);
     ros::Subscriber local_tar_sub = nh_sub.subscribe ("/uav22/odom" , 2,                                 &callback_tar);
     ros::Subscriber local_vel_sub = nh_sub.subscribe ("/uav21/mavros/local_position/velocity_local", 2,  &callback_local_vel);
     ros::Subscriber cmd_sub       = nh_sub.subscribe ("/uav21/mavros_comm_node/tele_key/cmd_vel", 2,     &callback_cmd_vel);
@@ -303,7 +311,9 @@ int main(int argc, char **argv)
 
     ros::Subscriber astar_sub     = nh_sub.subscribe ("/uav21/astar_path_info", 2,                       &callback_astar_path);
     ros::Subscriber goal_sub      = nh_sub.subscribe ("/uav21/GoalAction", 2,                            &callback_goal);
-    ros::Subscriber detection_sub = nh_sub.subscribe ("/uav21/detection", 2,                            &callback_detection);
+    ros::Subscriber detection_sub = nh_sub.subscribe ("/uav21/detection", 2,                             &callback_detection);
+
+    ros::Subscriber rc_in_sub = nh_sub.subscribe ("/uav21/mavros/rc/in", 2,                              &callback_rc_in);
 
     // Publish Topic
     ros::Publisher  local_vel_pub = nh_pub.advertise<geometry_msgs::TwistStamped>("/uav21/mavros/setpoint_velocity/cmd_vel", 2);
@@ -523,10 +533,16 @@ int main(int argc, char **argv)
         //wcmd_pre = wcmd_LPF;
         //rcmd_pre = rcmd_LPF;
 
-        velcmd.twist.linear.x = ucmd;
-        velcmd.twist.linear.y = vcmd;
-        velcmd.twist.linear.z = wcmd;
-        velcmd.twist.angular.z = -rcmd;
+        // velcmd.twist.linear.x = ucmd;
+        // velcmd.twist.linear.y = vcmd;
+        // velcmd.twist.linear.z = wcmd;
+        // velcmd.twist.angular.z = -rcmd;
+
+        velcmd.twist.linear.x = ucmd + (rc_in.channels[0] - PWM_ROL)/PWM_LEN*VELX_MAX;
+        velcmd.twist.linear.y = vcmd - (rc_in.channels[1] - PWM_PIT)/PWM_LEN*VELX_MAX;
+        velcmd.twist.linear.z = wcmd - (rc_in.channels[2] - PWM_THR)/PWM_LEN*VELZ_MAX;
+        velcmd.twist.angular.z = -rcmd - (rc_in.channels[3] - PWM_YAW)/PWM_LEN*VELR_MAX;
+
         local_vel_pub.publish(velcmd);
 
         count_ros = count_ros + 1;
@@ -571,7 +587,7 @@ void Mission_Update(void)
         case 11:
             Relative_WP_Flight();
             break;
-
+        
         default:
             cmd_x = 0.0;
             cmd_y = 0.0;
