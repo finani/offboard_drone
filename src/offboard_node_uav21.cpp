@@ -168,7 +168,7 @@ void callback_goal(const std_msgs::Float32MultiArray::ConstPtr& msg)
     goal[0] = GoalAction.data[1];
     goal[1] = GoalAction.data[2];
     goal[2] = GoalAction.data[3];
-    goal[3] = GoalAction.data[4];
+    goal[3] = GoalAction.data[4] *D2R; // deg 2 rad
 
     goal_velx = GoalAction.data[5];
     goal_velz = GoalAction.data[6];
@@ -296,15 +296,15 @@ ros::Publisher pos_cur_pub, path_uav_pub, pos_pred_pub, pos_tar_pub;
 
 int main(int argc, char **argv)
 {
-    ros::init(argc, argv, "offboard_node_uav1");
+    ros::init(argc, argv, "offboard_node_uav21");
     ros::NodeHandle nh_sub;
     ros::NodeHandle nh_pub;
 
     // Subscribe Topic
     ros::Subscriber state_sub     = nh_sub.subscribe ("/uav21/mavros/state" , 2,                         &callback_state);
-    //ros::Subscriber local_pos_sub = nh_sub.subscribe ("/uav21/mavros/local_position/pose", 2,            &callback_local_pos);
+    // ros::Subscriber local_pos_sub = nh_sub.subscribe ("/uav21/mavros/local_position/pose", 2,            &callback_local_pos);
     ros::Subscriber local_pos_sub = nh_sub.subscribe ("/uav21/mavros/global_position/local" , 2,         &callback_odom);
-    ros::Subscriber local_tar_sub = nh_sub.subscribe ("/uav22/odom" , 2,                                 &callback_tar);
+    // ros::Subscriber local_tar_sub = nh_sub.subscribe ("/uav22/odom" , 2,                                 &callback_tar);
     ros::Subscriber local_vel_sub = nh_sub.subscribe ("/uav21/mavros/local_position/velocity_local", 2,  &callback_local_vel);
     ros::Subscriber cmd_sub       = nh_sub.subscribe ("/uav21/mavros_comm_node/tele_key/cmd_vel", 2,     &callback_cmd_vel);
     ros::Subscriber flag_sub      = nh_sub.subscribe ("/uav21/mavros_comm_node/tele_key/flag", 2,        &callback_cmd_flag);
