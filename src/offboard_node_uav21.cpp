@@ -183,10 +183,10 @@ void callback_detection(const std_msgs::Float32MultiArray::ConstPtr& msg)
     tar_data.impos[1]    = msg->data[4];
 }
 
-void callback_rc_in(const mavros_msgs::RCIn::ConstPtr& msg)
-{
-    rc_in = *msg;
-}
+// void callback_rc_in(const mavros_msgs::RCIn::ConstPtr& msg)
+// {
+//     rc_in = *msg;
+// }
 
 void callback_state(const mavros_msgs::State::ConstPtr& msg)
 {
@@ -198,7 +198,7 @@ void callback_state(const mavros_msgs::State::ConstPtr& msg)
     std::cout << "\n          g_current_state.armed     = " << ((g_current_state.armed ) ? "OK!" : "Not yet!");
     std::cout << "\n          g_current_state.guided    = " << ((g_current_state.guided) ? "OK!" : "Not yet!");
     std::cout << "\n          g_current_state.mode      = " << g_current_state.mode;
-    std::cout << "\n          Cur   X Y r               = " << Cur_Pos_m[0] << ", "<< Cur_Pos_m[1] << ", "<<  Cur_Att_rad[2]*R2D;
+    std::cout << "\n          Cur   X Y Z r             = " << Cur_Pos_m[0] << ", "<< Cur_Pos_m[1] << ", "<< Cur_Pos_m[2] << ", "<<  Cur_Att_rad[2]*R2D;
     std::cout << "\n          Path  X Y r               = " << path.x << ", "<< path.y << ", "<<  path.psi*R2D;
     std::cout << "\n          velocity auto             = " << cmd_x << ", "<< cmd_y << ", "<< cmd_z  << ", "<< cmd_r;
     std::cout << "\n          velocity output           = " << velcmd.twist.linear.x << ", "<<velcmd.twist.linear.y << ", "<<velcmd.twist.linear.z <<  ", "<<velcmd.twist.angular.z;
@@ -313,7 +313,7 @@ int main(int argc, char **argv)
     ros::Subscriber goal_sub      = nh_sub.subscribe ("/uav21/GoalAction", 2,                            &callback_goal);
     ros::Subscriber detection_sub = nh_sub.subscribe ("/uav21/detection", 2,                             &callback_detection);
 
-    ros::Subscriber rc_in_sub = nh_sub.subscribe ("/uav21/mavros/rc/in", 2,                              &callback_rc_in);
+    // ros::Subscriber rc_in_sub = nh_sub.subscribe ("/uav21/mavros/rc/in", 2,                              &callback_rc_in);
 
     // Publish Topic
     ros::Publisher  local_vel_pub = nh_pub.advertise<geometry_msgs::TwistStamped>("/uav21/mavros/setpoint_velocity/cmd_vel", 2);
@@ -534,15 +534,15 @@ int main(int argc, char **argv)
         //wcmd_pre = wcmd_LPF;
         //rcmd_pre = rcmd_LPF;
 
-        // velcmd.twist.linear.x = ucmd;
-        // velcmd.twist.linear.y = vcmd;
-        // velcmd.twist.linear.z = wcmd;
-        // velcmd.twist.angular.z = -rcmd;
+        velcmd.twist.linear.x = ucmd;
+        velcmd.twist.linear.y = vcmd;
+        velcmd.twist.linear.z = wcmd;
+        velcmd.twist.angular.z = -rcmd;
 
-        velcmd.twist.linear.x = ucmd + (rc_in.channels[0] - PWM_ROL)/PWM_LEN*VELX_MAX;
-        velcmd.twist.linear.y = vcmd - (rc_in.channels[1] - PWM_PIT)/PWM_LEN*VELX_MAX;
-        velcmd.twist.linear.z = wcmd - (rc_in.channels[2] - PWM_THR)/PWM_LEN*VELZ_MAX;
-        velcmd.twist.angular.z = -rcmd - (rc_in.channels[3] - PWM_YAW)/PWM_LEN*VELR_MAX;
+        // velcmd.twist.linear.x = ucmd + (rc_in.channels[0] - PWM_ROL)/PWM_LEN*VELX_MAX;
+        // velcmd.twist.linear.y = vcmd - (rc_in.channels[1] - PWM_PIT)/PWM_LEN*VELX_MAX;
+        // velcmd.twist.linear.z = wcmd - (rc_in.channels[2] - PWM_THR)/PWM_LEN*VELZ_MAX;
+        // velcmd.twist.angular.z = -rcmd - (rc_in.channels[3] - PWM_YAW)/PWM_LEN*VELR_MAX;
 
         local_vel_pub.publish(velcmd);
 
