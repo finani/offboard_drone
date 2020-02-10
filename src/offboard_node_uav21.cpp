@@ -936,8 +936,8 @@ void Tracking(void)
 
 void Relative_WP_Flight(void)
 {
-    cmd_x = satmax(Kpx*goal[0],goal_velx);
-    cmd_y = satmax(Kpx*goal[1],goal_velx);
+    cmd_x = satmax(Kpx*(goal[0]*cos(Cur_Att_rad[2]) - goal[1]*sin(Cur_Att_rad[2])),goal_velx);
+    cmd_y = satmax(Kpx*(goal[0]*sin(Cur_Att_rad[2]) + goal[1]*cos(Cur_Att_rad[2])),goal_velx);
     cmd_z = satmax(Kpz*goal[2],goal_velz) + Kdz*(0.0 - Cur_Vel_mps[2]);
 
     angle_err = GetNED_angle_err(goal[3], Cur_Att_rad[2]);
