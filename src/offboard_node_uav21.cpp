@@ -77,6 +77,11 @@ float   cmd_y = 0.0;
 float   cmd_z = 0.0;
 float   cmd_r = 0.0;
 
+float   cmd_RCx = 0.0;
+float   cmd_RCy = 0.0;
+float   cmd_RCz = 0.0;
+float   cmd_RCr = 0.0;
+
 float   cmd_ut = 0.0;
 float   cmd_vt = 0.0;
 
@@ -121,33 +126,33 @@ int     flag_hovering = 0;
 
 int     turning_dir = 0;
 
-uint8_t   MotorAct = 0;
-uint8_t   FlightMode = 0;
-int       flag_armed = 0;
-int       count_ros = 0;
-int       goal_service = 0;
+uint8_t MotorAct = 0;
+uint8_t FlightMode = 0;
+int     flag_armed = 0;
+int     count_ros = 0;
+int     goal_service = 0;
 
-float    goal[4];
-float    goal_velx;
-float    goal_velz;
+float   goal[4];
+float   goal_velx;
+float   goal_velz;
 
-float    sample_x[20];
-float    sample_y[20];
-float    sample_z[20];
+float   sample_x[20];
+float   sample_y[20];
+float   sample_z[20];
 
-float    temp_x[19];
-float    temp_y[19];
-float    temp_z[19];
+float   temp_x[19];
+float   temp_y[19];
+float   temp_z[19];
 
-float    target_odom[3];
-float    prediction[3];
-float    t_cur = 0.0;
+float   target_odom[3];
+float   prediction[3];
+float   t_cur = 0.0;
 
-float    flight_angle = 0.0;
-float    del_sigma = 0.0;
+float   flight_angle = 0.0;
+float   del_sigma = 0.0;
 
-int      flag_PosAvailable = 0;
-char     filename[50];
+int     flag_PosAvailable = 0;
+char    filename[50];
 
 void callback_cmd_flag(const std_msgs::Float32MultiArray::ConstPtr& msg)
 {
@@ -183,10 +188,14 @@ void callback_detection(const std_msgs::Float32MultiArray::ConstPtr& msg)
     tar_data.impos[1]    = msg->data[4];
 }
 
-// void callback_rc_in(const mavros_msgs::RCIn::ConstPtr& msg)
-// {
-//     rc_in = *msg;
-// }
+void callback_rc_in(const mavros_msgs::RCIn::ConstPtr& msg_input)
+{
+    cmd_RCy =  (msg_input->channels[0] - PWM_ROL)/PWM_LEN*VELX_MAX;
+    cmd_RCx = -(msg_input->channels[1] - PWM_PIT)/PWM_LEN*VELX_MAX;
+    cmd_RCz =  (msg_input->channels[2] - PWM_THR)/PWM_LEN*VELZ_MAX;
+    cmd_RCr =  (msg_input->channels[3] - PWM_YAW)/PWM_LEN*VELR_MAX;
+
+}
 
 void callback_state(const mavros_msgs::State::ConstPtr& msg)
 {
@@ -518,10 +527,10 @@ int main(int argc, char **argv)
         else
         {
             // auto control mode
-            ucmd =   cmd_x + (tele_cmd.linear.x)*cos(Cur_Att_rad[2]) + (tele_cmd.linear.y)*sin(Cur_Att_rad[2]);
-            vcmd =   cmd_y + (tele_cmd.linear.x)*sin(Cur_Att_rad[2]) - (tele_cmd.linear.y)*cos(Cur_Att_rad[2]);
-            wcmd =   cmd_z + tele_cmd.linear.z;
-            rcmd =   cmd_r + tele_cmd.angular.z;
+            ucmd =   cmd_x + (tele_cmd.linear.x + cmd_RCx)*cos(Cur_Att_rad[2]) + (tele_cmd.linear.y + cmd_RCy)*sin(Cur_Att_rad[2]);
+            vcmd =   cmd_y + (tele_cmd.linear.x + cmd_RCx)*sin(Cur_Att_rad[2]) - (tele_cmd.linear.y + cmd_RCy)*cos(Cur_Att_rad[2]);
+            wcmd =   cmd_z + tele_cmd.linear.z + cmd_RCz;
+            rcmd =   cmd_r + tele_cmd.angular.z + cmd_RCr;
         }
 
         //ucmd_LPF = LPF(ucmd, ucmd_pre, 4.0);
@@ -538,11 +547,6 @@ int main(int argc, char **argv)
         velcmd.twist.linear.y = vcmd;
         velcmd.twist.linear.z = wcmd;
         velcmd.twist.angular.z = -rcmd;
-
-        // velcmd.twist.linear.x = ucmd + (rc_in.channels[0] - PWM_ROL)/PWM_LEN*VELX_MAX;
-        // velcmd.twist.linear.y = vcmd - (rc_in.channels[1] - PWM_PIT)/PWM_LEN*VELX_MAX;
-        // velcmd.twist.linear.z = wcmd - (rc_in.channels[2] - PWM_THR)/PWM_LEN*VELZ_MAX;
-        // velcmd.twist.angular.z = -rcmd - (rc_in.channels[3] - PWM_YAW)/PWM_LEN*VELR_MAX;
 
         local_vel_pub.publish(velcmd);
 
@@ -936,8 +940,8 @@ void Tracking(void)
 
 void Relative_WP_Flight(void)
 {
-    cmd_x = satmax(Kpx*(goal[0]*cos(Cur_Att_rad[2]) - goal[1]*sin(Cur_Att_rad[2])),goal_velx);
-    cmd_y = satmax(Kpx*(goal[0]*sin(Cur_Att_rad[2]) + goal[1]*cos(Cur_Att_rad[2])),goal_velx);
+    cmd_x = satmax(Kpx*(goal[0]*cos(Cur_Att_rad[2]) + goal[1]*sin(Cur_Att_rad[2])),goal_velx);
+    cmd_y = satmax(Kpx*(goal[0]*sin(Cur_Att_rad[2]) - goal[1]*cos(Cur_Att_rad[2])),goal_velx);
     cmd_z = satmax(Kpz*goal[2],goal_velz) + Kdz*(0.0 - Cur_Vel_mps[2]);
 
     angle_err = GetNED_angle_err(goal[3], Cur_Att_rad[2]);
