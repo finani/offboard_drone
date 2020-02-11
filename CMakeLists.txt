@@ -52,9 +52,17 @@ link_directories(${OpenCV_LIBRARY_DIRS})
 add_executable(
 	offboard_node_uav21
 	src/offboard_node_uav21.cpp)
+add_executable(
+	offboard_node_uav21_gazebo
+	src/offboard_node_uav21_gazebo.cpp)
 
 target_link_libraries(
 	offboard_node_uav21
+	${catkin_LIBRARIES}
+    ${OpenCV_LIBS}  
+)
+target_link_libraries(
+	offboard_node_uav21_gazebo
 	${catkin_LIBRARIES}
     ${OpenCV_LIBS}  
 )

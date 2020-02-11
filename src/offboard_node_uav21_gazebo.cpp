@@ -181,15 +181,6 @@ void callback_detection(const std_msgs::Float32MultiArray::ConstPtr& msg)
     tar_data.impos[1]    = msg->data[4];
 }
 
-void callback_rc_in(const mavros_msgs::RCIn::ConstPtr& msg_input)
-{
-    cmd_RCy =  (msg_input->channels[0] - PWM_ROL)/PWM_LEN*VELX_MAX;
-    cmd_RCx = -(msg_input->channels[1] - PWM_PIT)/PWM_LEN*VELX_MAX;
-    cmd_RCz =  (msg_input->channels[2] - PWM_THR)/PWM_LEN*VELZ_MAX;
-    cmd_RCr =  (msg_input->channels[3] - PWM_YAW)/PWM_LEN*VELR_MAX;
-
-}
-
 void callback_state(const mavros_msgs::State::ConstPtr& msg)
 {
     g_current_state = *msg;
@@ -298,7 +289,7 @@ ros::Publisher pos_cur_pub, path_uav_pub, pos_pred_pub, pos_tar_pub;
 
 int main(int argc, char **argv)
 {
-    ros::init(argc, argv, "offboard_node_uav21");
+    ros::init(argc, argv, "offboard_node_uav21_gazebo");
     ros::NodeHandle nh_sub;
     ros::NodeHandle nh_pub;
 
