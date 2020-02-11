@@ -70,17 +70,10 @@ std_msgs::Float32MultiArray    Detection;
 nav_msgs::Path path_cur;
 visualization_msgs::MarkerArray TargetArray;
 
-mavros_msgs::RCIn               rc_in;
-
 float   cmd_x = 0.0;
 float   cmd_y = 0.0;
 float   cmd_z = 0.0;
 float   cmd_r = 0.0;
-
-float   cmd_RCx = 0.0;
-float   cmd_RCy = 0.0;
-float   cmd_RCz = 0.0;
-float   cmd_RCr = 0.0;
 
 float   cmd_ut = 0.0;
 float   cmd_vt = 0.0;
@@ -322,8 +315,6 @@ int main(int argc, char **argv)
     ros::Subscriber goal_sub      = nh_sub.subscribe ("/uav21/GoalAction", 2,                            &callback_goal);
     ros::Subscriber detection_sub = nh_sub.subscribe ("/uav21/detection", 2,                             &callback_detection);
 
-    ros::Subscriber rc_in_sub = nh_sub.subscribe ("/uav21/mavros/rc/in", 2,                              &callback_rc_in);
-
     // Publish Topic
     ros::Publisher  local_vel_pub = nh_pub.advertise<geometry_msgs::TwistStamped>("/uav21/mavros/setpoint_velocity/cmd_vel", 2);
 
@@ -399,6 +390,18 @@ int main(int argc, char **argv)
 
     while(ros::ok())
     {
+        if (goal_service == 0)
+        {
+            tele_flag.data[0] = 0;  // disarming
+            tele_flag.data[1] = 0;  // manual
+            mission.data = 0;  // [takeoff]
+            //takeoff_request = ros::Time::now();
+        }
+        else
+        {
+            tele_flag.data[0] = 1;  // arming
+            tele_flag.data[1] = 1;  // auto
+        }
 /*
         if( g_current_state.mode != "OFFBOARD" && ((ros::Time::now() - last_request) > ros::Duration(1.0)))
         {
@@ -445,7 +448,7 @@ int main(int argc, char **argv)
         //printf("%d", subt_service.service);
 
         //if(flag_armed == 1)
-	    if(g_current_state.mode == "OFFBOARD")
+	if(g_current_state.mode == "OFFBOARD")
         {
             //goal_service = 6;
             Mission_Update();
@@ -504,12 +507,22 @@ int main(int argc, char **argv)
 
         close(train_fd);
 #endif
-
-        // auto control mode
-        ucmd =   cmd_x + cmd_RCx*cos(Cur_Att_rad[2]) + cmd_RCy*sin(Cur_Att_rad[2]);
-        vcmd =   cmd_y + cmd_RCx*sin(Cur_Att_rad[2]) - cmd_RCy*cos(Cur_Att_rad[2]);
-        wcmd =   cmd_z + tele_cmd.linear.z + cmd_RCz;
-        rcmd =   cmd_r + tele_cmd.angular.z + cmd_RCr;
+        if(tele_flag.data[1] == 0)
+        {
+            // manual control mode
+            ucmd =   (tele_cmd.linear.x)*cos(Cur_Att_rad[2]) + (tele_cmd.linear.y)*sin(Cur_Att_rad[2]);
+            vcmd =   (tele_cmd.linear.x)*sin(Cur_Att_rad[2]) - (tele_cmd.linear.y)*cos(Cur_Att_rad[2]);
+            wcmd =   tele_cmd.linear.z;
+            rcmd =   tele_cmd.angular.z;
+        }
+        else
+        {
+            // auto control mode
+            ucmd =   cmd_x + tele_cmd.linear.x*cos(Cur_Att_rad[2]) + tele_cmd.linear.y*sin(Cur_Att_rad[2]);
+            vcmd =   cmd_y + tele_cmd.linear.x*sin(Cur_Att_rad[2]) - tele_cmd.linear.y*cos(Cur_Att_rad[2]);
+            wcmd =   cmd_z + tele_cmd.linear.z;
+            rcmd =   cmd_r + tele_cmd.angular.z;
+        }
 
         //ucmd_LPF = LPF(ucmd, ucmd_pre, 4.0);
         //vcmd_LPF = LPF(vcmd, vcmd_pre, 4.0);
