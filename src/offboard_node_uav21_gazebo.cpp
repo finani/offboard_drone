@@ -517,8 +517,8 @@ int main(int argc, char **argv)
 
         //ucmd_LPF = LPF(ucmd, ucmd_pre, 4.0);
         //vcmd_LPF = LPF(vcmd, vcmd_pre, 4.0);
-        //wcmd_LPF = LPF(wcmd, wcmd_pre, 4.0);
-        //rcm1d_LPF = LPF(rcmd, rcmd_pre, 4.0);
+        // wcmd_LPF = LPF(wcmd, wcmd_pre, 4.0);
+        //rcmd_LPF = LPF(rcmd, rcmd_pre, 4.0);
 
         //ucmd_pre = ucmd_LPF;
         //vcmd_pre = vcmd_LPF;
@@ -922,12 +922,12 @@ void Tracking(void)
 
 void Relative_WP_Flight(void)
 {
-    cmd_x = satmax(Kpx*(goal[0]*cos(Cur_Att_rad[2]) + goal[1]*sin(Cur_Att_rad[2])),goal_velx);
-    cmd_y = satmax(Kpx*(goal[0]*sin(Cur_Att_rad[2]) - goal[1]*cos(Cur_Att_rad[2])),goal_velx);
-    cmd_z = satmax(Kpz*goal[2],goal_velz) + Kdz*(0.0 - Cur_Vel_mps[2]);
+    cmd_x = satmax(Kpx_rel*(goal[0]*cos(Cur_Att_rad[2]) + goal[1]*sin(Cur_Att_rad[2])),goal_velx);
+    cmd_y = satmax(Kpx_rel*(goal[0]*sin(Cur_Att_rad[2]) - goal[1]*cos(Cur_Att_rad[2])),goal_velx);
+    cmd_z = satmax(Kpz_rel*goal[2],goal_velz) + Kdz_rel*(0.0 - Cur_Vel_mps[2]);
 
     angle_err = GetNED_angle_err(goal[3], Cur_Att_rad[2]);
-    cmd_r = -satmax(Kr*angle_err, R_MAX);
+    cmd_r = -satmax(Kr_rel*angle_err, R_MAX);
     // mission.data = 11;  // [fly_to]
 
     hover[0] = Cur_Pos_m[0];

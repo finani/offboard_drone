@@ -34,6 +34,11 @@
 #define Kdz           0.3
 #define Kr            1.0
 
+#define Kpx_rel       0.3
+#define Kpz_rel       1.0
+#define Kdz_rel       0.2
+#define Kr_rel        1.0
+
 // for tracking mission
 #define VX_MAX        0.6
 #define VZ_MAX        0.5
