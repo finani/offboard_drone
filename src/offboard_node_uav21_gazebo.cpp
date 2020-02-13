@@ -938,9 +938,9 @@ void Relative_WP_Flight(void)
     cmd_y_pre = cmd_y_raw;
     cmd_z_pre = cmd_z_raw;
 
-    cmd_x = LPF(cmd_x_raw, cmd_x_pre, 20.0);
-    cmd_y = LPF(cmd_y_raw, cmd_y_pre, 20.0);
-    cmd_z = LPF(cmd_z_raw, cmd_z_pre, 20.0);
+    cmd_x = LPF(cmd_x_raw, cmd_x_pre, 50.0);
+    cmd_y = LPF(cmd_y_raw, cmd_y_pre, 50.0);
+    cmd_z = LPF(cmd_z_raw, cmd_z_pre, 50.0);
 
     angle_err = GetNED_angle_err(goal[3], Cur_Att_rad[2]);
     cmd_r = -satmax(Kr_rel*angle_err, R_MAX);
