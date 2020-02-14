@@ -34,7 +34,7 @@
 #define Kdz           0.3
 #define Kr            1.0
 
-#define Kpx_rel       1.0
+#define Kpx_rel       0.5
 #define Kpz_rel       1.0
 #define Kdz_rel       0.2
 #define Kr_rel        1.0

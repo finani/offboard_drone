@@ -926,17 +926,17 @@ void Tracking(void)
 
 void Relative_WP_Flight(void)
 {
-    cmd_x_raw = satmax(Kpx_rel*(goal[0]*cos(Cur_Att_rad[2]) + goal[1]*sin(Cur_Att_rad[2])),goal_velx);
-    cmd_y_raw = satmax(Kpx_rel*(goal[0]*sin(Cur_Att_rad[2]) - goal[1]*cos(Cur_Att_rad[2])),goal_velx);
+    cmd_x_raw = satmax(Kpx_rel*(goal[0]*cos(Cur_Att_rad[2]) - goal[1]*sin(Cur_Att_rad[2])),goal_velx);
+    cmd_y_raw = satmax(Kpx_rel*(goal[0]*sin(Cur_Att_rad[2]) + goal[1]*cos(Cur_Att_rad[2])),goal_velx);
     cmd_z_raw = satmax(Kpz_rel*goal[2],goal_velz) + Kdz_rel*(0.0 - Cur_Vel_mps[2]);
 
-    cmd_x_pre = cmd_x_raw;
-    cmd_y_pre = cmd_y_raw;
-    cmd_z_pre = cmd_z_raw;
+    cmd_x = LPF(cmd_x_raw, cmd_x_pre, 10.0);
+    cmd_y = LPF(cmd_y_raw, cmd_y_pre, 10.0);
+    cmd_z = LPF(cmd_z_raw, cmd_z_pre, 10.0);
 
-    cmd_x = LPF(cmd_x_raw, cmd_x_pre, 50.0);
-    cmd_y = LPF(cmd_y_raw, cmd_y_pre, 50.0);
-    cmd_z = LPF(cmd_z_raw, cmd_z_pre, 50.0);
+    cmd_x_pre = cmd_x;
+    cmd_y_pre = cmd_y;
+    cmd_z_pre = cmd_z;
 
     angle_err = GetNED_angle_err(goal[3], Cur_Att_rad[2]);
     cmd_r = -satmax(Kr_rel*angle_err, R_MAX);
