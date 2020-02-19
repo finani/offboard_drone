@@ -29,9 +29,9 @@
 #define  alt_offset        0.2        // [m]
 #define  Vx_track          2.5
 
-#define Kpx           2.0
-#define Kpz           1.5
-#define Kdz           0.3
+#define Kpx           1.0
+#define Kpz           1.0
+#define Kdz           0.2
 #define Kr            1.0
 
 #define Kpx_rel       0.5
@@ -178,4 +178,3 @@ struct struct_Tar_data
 }tar_data;
 
 #endif
-
