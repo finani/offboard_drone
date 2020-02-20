@@ -696,7 +696,7 @@ void Hovering(void)
     cmd_x = satmax(Kpx*(hover[0] - Cur_Pos_m[0]),goal_velx);
     cmd_y = satmax(Kpx*(hover[1] - Cur_Pos_m[1]),goal_velx);
 //     cmd_z = satmax(Kpz*(goal[2] - Cur_Pos_m[2]),goal_velz);
-    cmd_z = satmax(Kpz*(hover_heading - Cur_Pos_m[2]),goal_velz);`
+    cmd_z = satmax(Kpz*(hover_heading - Cur_Pos_m[2]),goal_velz);
 
     angle_err = GetNED_angle_err(goal[3], Cur_Att_rad[2]);
     cmd_r = -satmax(Kr*angle_err, R_MAX);
