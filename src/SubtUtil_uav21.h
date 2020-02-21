@@ -29,14 +29,14 @@
 #define  alt_offset        0.2        // [m]
 #define  Vx_track          2.5
 
-#define Kpx           1.0
-#define Kpz           1.0
-#define Kdz           0.2
+#define Kpx           0.5
+#define Kpz           0.7
+#define Kdz           0.14
 #define Kr            1.0
 
 #define Kpx_rel       0.5
-#define Kpz_rel       1.0
-#define Kdz_rel       0.2
+#define Kpz_rel       0.7
+#define Kdz_rel       0.14
 #define Kr_rel        1.0
 
 // for tracking mission
