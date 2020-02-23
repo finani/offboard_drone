@@ -66,6 +66,7 @@ std_msgs::Float32MultiArray    tele_flag;
 geometry_msgs::Twist           tele_cmd;
 std_msgs::Float32MultiArray    GoalAction;
 std_msgs::Float32MultiArray    Detection;
+std_msgs::Float32              lidardata;
 
 nav_msgs::Path path_cur;
 visualization_msgs::MarkerArray TargetArray;
@@ -102,6 +103,8 @@ float   Cur_Att_rad[3];
 float   Cur_Att[3];
 float   cmd_rpy[3];
 float   height_m = 0.0;
+
+float   cur_lidar = 0;
 
 float   pos_x = 0.0;
 float   pos_y = 0.0;
@@ -296,6 +299,14 @@ void callback_local_vel(const geometry_msgs::TwistStamped::ConstPtr& msg_input)
     Cur_Vel_mps[2] = Localvel.twist.linear.z;
 }
 
+
+
+void callback_lidar(const std_msgs::Float32::ConstPtr& msg_input)
+{
+    lidardata = *msg_input;
+    cur_lidar = lidardata.data;
+}
+
 void Local_Mission_Update(void);
 void Mission_Update(void);
 void Auto_Takeoff(void);
@@ -331,6 +342,7 @@ int main(int argc, char **argv)
     ros::Subscriber detection_sub = nh_sub.subscribe ("/uav21/detection", 2,                             &callback_detection);
 
     ros::Subscriber rc_in_sub = nh_sub.subscribe ("/uav21/mavros/rc/in", 2,                              &callback_rc_in);
+    ros::Subscriber lidar_sub = nh_sub.subscribe ("/lidar/Altitude", 2,                                  &callback_lidar);
 
     // Publish Topic
     ros::Publisher  local_vel_pub = nh_pub.advertise<geometry_msgs::TwistStamped>("/uav21/mavros/setpoint_velocity/cmd_vel", 2);
@@ -657,7 +669,8 @@ void WP_Flight(void)
 {
     cmd_x = satmax(Kpx*(goal[0] - Cur_Pos_m[0]),goal_velx);
     cmd_y = satmax(Kpx*(goal[1] - Cur_Pos_m[1]),goal_velx);
-    cmd_z = satmax(Kpz*(goal[2] - Cur_Pos_m[2]),goal_velz) + Kdz*(0.0 - Cur_Vel_mps[2]);
+    // cmd_z = satmax(Kpz*(goal[2] - Cur_Pos_m[2]),goal_velz) + Kdz*(0.0 - Cur_Vel_mps[2]);
+    cmd_z = satmax(Kpz*(goal[2] - cur_lidar),goal_velz) + Kdz*(0.0 - Cur_Vel_mps[2]);
 
     angle_err = GetNED_angle_err(goal[3], Cur_Att_rad[2]);
     cmd_r = -satmax(Kr*angle_err, R_MAX);
