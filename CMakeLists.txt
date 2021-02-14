@@ -1,18 +1,15 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(offboard_drone)
 
-#find_package(Boost COMPONENTS program_options REQUIRED)
-#find_package(OpenCV 3.3 COMPONENTS core highgui imgproc REQUIRED)
-find_package(OpenCV COMPONENTS core highgui imgproc REQUIRED)
-
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS
+find_package(
+  catkin REQUIRED COMPONENTS
   roscpp
-  rospy
-  geometry_msgs
   std_msgs
+  nav_msgs
+  geometry_msgs
   sensor_msgs
   tf
 )
@@ -29,12 +26,13 @@ add_definitions(-std=c++11)
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
-#  LIBRARIES test
-  CATKIN_DEPENDS roscpp std_msgs
-#  DEPENDS system_lib
-   sensor_msgs
-   tf
+  CATKIN_DEPENDS
+  roscpp
+  std_msgs
+  nav_msgs
+  geometry_msgs
+  sensor_msgs
+  tf
 )
 
 ###########
@@ -44,25 +42,14 @@ catkin_package(
 # include_directories(include)
 include_directories(
   ${catkin_INCLUDE_DIRS}
-  ${OpenCV_INCLUDE_DIRS}
 )
 
-link_directories(${OpenCV_LIBRARY_DIRS})
-
 add_executable(
-	offboard_node_uav21
-	src/offboard_node_uav21.cpp)
-add_executable(
-	offboard_node_uav21_gazebo
-	src/offboard_node_uav21_gazebo.cpp)
-
-target_link_libraries(
-	offboard_node_uav21
-	${catkin_LIBRARIES}
-    ${OpenCV_LIBS}  
+	offboard_node
+	src/offboard_node.cpp
 )
+
 target_link_libraries(
-	offboard_node_uav21_gazebo
+	offboard_node
 	${catkin_LIBRARIES}
-    ${OpenCV_LIBS}  
 )

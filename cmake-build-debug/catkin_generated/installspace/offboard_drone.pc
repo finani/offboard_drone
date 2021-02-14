@@ -1,0 +1,8 @@
+prefix=/usr/local
+
+Name: offboard_drone
+Description: Description of offboard_drone
+Version: 0.1.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: roscpp std_msgs sensor_msgs tf
