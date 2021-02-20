@@ -19,3 +19,4 @@ cmake-build-debug
 
 # ignore all .pdf files in the doc/ directory
 #doc/**/*.pdf
+
