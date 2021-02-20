@@ -14,13 +14,13 @@ int main(int argc, char **argv)
   ros::Rate rate(px4drone.getRosRate());
 
   // wait for Initialization
-  while(ros::ok() && !px4drone.doInitialization(rate)) { //TODO: add == true on everywhere like this
+  while(ros::ok() && !px4drone.doInitialization(rate)) {
     ros::spinOnce();
     rate.sleep();
   } 
 
   //TODO: rosparam -> On/Off
-  // px4drone.doMission(0, -1, -1, 3, -1, -1, 1, -1, rate); // Auto arm(POSCTL) - Takeoff - OFFBOARD
+  // px4drone.doMission(0, #, #, #, #, rate); // Auto arm(POSCTL) - Takeoff - OFFBOARD
 
   cout << "main loop start" << endl;
   while(ros::ok())
@@ -32,8 +32,8 @@ int main(int argc, char **argv)
     px4drone.showState();
     px4drone.showOdom();
 
-    // px4drone.doMission(23, 1, 2, 3, 45, 3, 1, 1, rate);
-    px4drone.doMission(px4drone.getGoalService(), px4drone.getGoalX(), px4drone.getGoalY(), px4drone.getGoalZ(), px4drone.getGoalR(), px4drone.getGoalVXY(), px4drone.getGoalVZUp(), px4drone.getGoalVZDown(), rate);
+    // px4drone.doMission(23, 1, 2, 3, 45, rate);
+    px4drone.doMission(px4drone.getGoalService(), px4drone.getGoalX(), px4drone.getGoalY(), px4drone.getGoalZ(), px4drone.getGoalR(), rate);
     //TODO: pub with rate keep calling doMission
 
     px4drone.pubRvizTopics();

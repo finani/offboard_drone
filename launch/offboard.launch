@@ -2,4 +2,5 @@
 <launch>
     <node name="offboard_node" type="offboard_node" output="screen" pkg="offboard_drone">
     </node>
+    <rosparam command="load" file="$(find offboard_drone)/config/default.yaml"/>
 </launch>

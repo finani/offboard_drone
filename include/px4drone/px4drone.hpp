@@ -41,9 +41,6 @@ class Px4Drone {
   float getGoalY(void);
   float getGoalZ(void);
   float getGoalR(void);
-  float getGoalVXY(void);
-  float getGoalVZUp(void);
-  float getGoalVZDown(void);
   float getRosRate(void);
 
   bool setParamWithAck(std::string param_id_, int value_);
@@ -56,18 +53,18 @@ class Px4Drone {
   bool setPosctl(void);
   bool setOffboard(void);
 
-  bool goTakeOff(float takeoffAlt_m_, float takeoffSpd_mps_);
-  bool goLanding(float landSpd_mps_);
+  bool goTakeOff(void);
+  bool goLanding(void);
   void goForce(void);
   void goAccel(void);
   void goAngularVelocity(void);
   void goAttitude(void);
   void goVelocity(double xEast_mps_, double yNorth_mps_, double zUp_mps_, double headingCCW_deg_);
   void goVelocityBody(double xForward_mps_, double yLeft_mps_, double zUp_mps_, double headingCCW_deg_);
-  void goPosition(double xEast_m_, double yNorth_m_, double zUp_m_, double headingCCW_deg_, double VXY_mps_, double VZUp_mps_, double VZDown_mps_);
+  void goPosition(double xEast_m_, double yNorth_m_, double zUp_m_, double headingCCW_deg_);
 
   bool doInitialization(ros::Rate rate_);
-  void doMission(int goalService_, double goalX_, double goalY_, double goalZ_, double goalR_, double goalVXY_, double goalVZUp_, double goalVZDown_, ros::Rate rate_);
+  void doMission(int goalService_, double goalX_, double goalY_, double goalZ_, double goalR_, ros::Rate rate_);
 
   void pubRvizTopics(void);
 
@@ -98,17 +95,17 @@ class Px4Drone {
   tf::Vector3 mCurRpy_deg;
   tf::Vector3 mCurRpyRate_dps;
 
-  bool mAutoOverride;
-  bool mOffboardOverride;
-
   std_msgs::Float32MultiArray mGoalAction;
   int mGoalService;
   double mGoalX;
   double mGoalY;
   double mGoalZ;
   double mGoalR;
-  double mGoalVXY;
-  double mGoalVZUp;
-  double mGoalVZDown;
   float mRosRate;
+
+  bool mAutoOverride;
+  bool mOffboardOverride;
+  float mTakeoffAlt_m;
+  float mTakeoffSpd_mps;
+  float mLandSpd_mps;
 };

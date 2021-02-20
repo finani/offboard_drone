@@ -1,0 +1,13 @@
+Px4_Drone:
+  Commander:
+    COM_RC_OVERRIDE_AUTO: True
+    COM_RC_OVERRIDE_OFFBOARD: True
+    # Enable RC stick override of auto and/or offboard modes
+  Mission:
+    MIS_TAKEOFF_ALT: 3.0
+    # Take-off altitude [m]
+  Multicopter_Position_Control:
+    MPC_TKO_SPEED: 1.0
+    # Takeoff climb rate [mps]
+    MPC_LAND_SPEED: 0.5
+    # Landing descend rate [mps]
