@@ -2,7 +2,7 @@
 <package>
   <name>offboard_drone</name>
   <version>0.1.0</version>
-  <description>offboard code</description>
+  <description>px4drone offboard code</description>
   <maintainer email="inhwan.wee@nearthlab.com">Inhwan Wee</maintainer>
 
   <license>BSD</license>
@@ -16,13 +16,11 @@
   <build_depend>std_msgs</build_depend>
   <build_depend>nav_msgs</build_depend>
   <build_depend>geometry_msgs</build_depend>
-  <build_depend>sensor_msgs</build_depend>
   <run_depend>roscpp</run_depend>
   <run_depend>tf</run_depend>
   <run_depend>std_msgs</run_depend>
   <run_depend>nav_msgs</run_depend>
   <run_depend>geometry_msgs</run_depend>
-  <run_depend>sensor_msgs</run_depend>
 
   <export>
   </export>
