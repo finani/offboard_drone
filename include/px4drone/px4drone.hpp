@@ -55,6 +55,7 @@ class Px4Drone {
 
   bool goTakeOff(void);
   bool goLanding(void);
+  bool goReturn(void);
   void goForce(void);
   void goAccel(void);
   void goAngularVelocity(void);
@@ -93,7 +94,7 @@ class Px4Drone {
   tf::Quaternion mCurQ;
   tf::Vector3 mCurRpy_rad;
   tf::Vector3 mCurRpy_deg;
-  tf::Vector3 mCurRpyRate_dps;
+  tf::Vector3 mCurRpyRate_rps;
 
   std_msgs::Float32MultiArray mGoalAction;
   int mGoalService;
@@ -103,9 +104,18 @@ class Px4Drone {
   double mGoalR;
   float mRosRate;
 
+  float mArmAccErr_mpss;
+  float mArmGyroErr_rps;
+  int mArmMagErr_deg;
   bool mAutoOverride;
   bool mOffboardOverride;
+  int mGeofenceAction;
+  float mGeofenceXY_m;
+  float mGeofenceZ_m;
   float mTakeoffAlt_m;
   float mTakeoffSpd_mps;
   float mLandSpd_mps;
+  float mXYMaxSpd_mps;
+  float mZUpMaxSpd_mps;
+  float mZDownMaxSpd_mps;
 };

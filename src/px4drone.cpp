@@ -8,9 +8,9 @@ Px4Drone::Px4Drone(ros::NodeHandle *nh_)
     mCurQ(0,0,0,0),
     mCurRpy_rad(0,0,0),
     mCurRpy_deg(0,0,0),
-    mCurRpyRate_dps(0,0,0),
-    mAutoOverride(true), // default: true
-    mOffboardOverride(true), // default: false
+    mCurRpyRate_rps(0,0,0),
+    mAutoOverride(true),
+    mOffboardOverride(false),
     mGoalService(-1),
     mGoalX(0),
     mGoalY(0),
@@ -30,11 +30,20 @@ Px4Drone::Px4Drone(ros::NodeHandle *nh_)
   mParamSet_client = nh_->serviceClient <mavros_msgs::ParamSet> ("/mavros/param/set");
   mParamGet_client = nh_->serviceClient <mavros_msgs::ParamGet> ("/mavros/param/get");
 
+  nh_->getParam("/Px4_Drone/Commander/COM_ARM_IMU_ACC", mArmAccErr_mpss);
+  nh_->getParam("/Px4_Drone/Commander/COM_ARM_IMU_GYR", mArmGyroErr_rps);
+  nh_->getParam("/Px4_Drone/Commander/COM_ARM_MAG_ANG", mArmMagErr_deg);
   nh_->getParam("/Px4_Drone/Commander/COM_RC_OVERRIDE_AUTO", mAutoOverride);
   nh_->getParam("/Px4_Drone/Commander/COM_RC_OVERRIDE_OFFBOARD", mOffboardOverride);
   nh_->getParam("/Px4_Drone/Mission/MIS_TAKEOFF_ALT", mTakeoffAlt_m);
+  nh_->getParam("/Px4_Drone/Geofence/GF_ACTION", mGeofenceAction);
+  nh_->getParam("/Px4_Drone/Geofence/GF_MAX_HOR_DIST", mGeofenceXY_m);
+  nh_->getParam("/Px4_Drone/Geofence/GF_MAX_VER_DIST", mGeofenceZ_m);
   nh_->getParam("/Px4_Drone/Multicopter_Position_Control/MPC_TKO_SPEED", mTakeoffSpd_mps);
   nh_->getParam("/Px4_Drone/Multicopter_Position_Control/MPC_LAND_SPEED", mLandSpd_mps);
+  nh_->getParam("/Px4_Drone/Multicopter_Position_Control/MPC_XY_VEL_MAX", mXYMaxSpd_mps);
+  nh_->getParam("/Px4_Drone/Multicopter_Position_Control/MPC_Z_VEL_MAX_UP", mZUpMaxSpd_mps);
+  nh_->getParam("/Px4_Drone/Multicopter_Position_Control/MPC_Z_VEL_MAX_DN", mZDownMaxSpd_mps);
 }
 
 Px4Drone::~Px4Drone() {
@@ -62,7 +71,7 @@ void Px4Drone::cbOdom(const nav_msgs::Odometry::ConstPtr& msg_) {
     mOdom.twist.twist.linear.y,
     mOdom.twist.twist.linear.z);
 
-  mCurRpyRate_dps.setValue(mOdom.twist.twist.angular.x,
+  mCurRpyRate_rps.setValue(mOdom.twist.twist.angular.x,
     mOdom.twist.twist.angular.y,
     mOdom.twist.twist.angular.z);
 
@@ -110,16 +119,16 @@ void Px4Drone::showState(void) {
 void Px4Drone::showOdom(void) {
   cout << endl;
   cout << "\t[Px4Drone] Odometry\t(/mavros/local_position/odom)" << endl;
-  cout << "m_odom.position_m [x,y,z]        = [" << mCurPos_m.getX() << \
-    ",\t" << mCurPos_m.getY() << ",\t" << mCurPos_m.getZ() << "]" << endl;
-  cout << "m_odom.velocity_mps [x,y,z]      = [" << mCurVel_mps.getX() << \
-    ",\t" << mCurVel_mps.getY() << ",\t" << mCurVel_mps.getZ() << "]" << endl;
-  cout << "m_odom.orientation_rad [x,y,z,w] = [" << mCurQ.getX() << \
-    ",\t" << mCurQ.getY() << ",\t" << mCurQ.getZ() << ",\t" << mCurQ.getW() << "]" << endl;
-  cout << "m_odom.rpy_deg [r,p,y]           = [" << mCurRpy_deg.getX() << \
-    ",\t" << mCurRpy_deg.getY() << ",\t" << mCurRpy_deg.getZ() << "]" << endl;
-  cout << "m_odom.rpy_rate_deg [r,p,y]      = [" << mCurRpyRate_dps.getX() << \
-    ",\t" << mCurRpyRate_dps.getY() << ",\t" << mCurRpyRate_dps.getZ() << "]" << endl;
+  cout << "m_odom.position_m [x,y,z]      = [" << mCurPos_m.getX() << \
+    ", \t" << mCurPos_m.getY() << ", \t" << mCurPos_m.getZ() << "]" << endl;
+  cout << "m_odom.velocity_mps [x,y,z]    = [" << mCurVel_mps.getX() << \
+    ", \t" << mCurVel_mps.getY() << ", \t" << mCurVel_mps.getZ() << "]" << endl;
+  cout << "m_odom.orientation_q [x,y,z,w] = [" << mCurQ.getX() << \
+    ", \t" << mCurQ.getY() << ", \t" << mCurQ.getZ() << ", \t" << mCurQ.getW() << "]" << endl;
+  cout << "m_odom.rpy_deg [r,p,y]         = [" << mCurRpy_deg.getX() << \
+    ", \t" << mCurRpy_deg.getY() << ", \t" << mCurRpy_deg.getZ() << "]" << endl;
+  cout << "m_odom.rpy_rate_rps [r,p,y]    = [" << mCurRpyRate_rps.getX() << \
+    ", \t" << mCurRpyRate_rps.getY() << ", \t" << mCurRpyRate_rps.getZ() << "]" << endl;
   cout << endl;
   return;
 }
@@ -128,8 +137,8 @@ void Px4Drone::showGoalAction(void) {
   cout << endl;
   cout << "\t[Px4Drone] GoalAction\t(/GoalAction)" << endl;
   cout << "goal_service    = [" << mGoalService << endl;
-  cout << "goal [x,y,z, r] = [" << mGoalX << ",\t" << mGoalY << ",\t" << \
-    mGoalZ << ",\t" << mGoalR << "]" << endl;
+  cout << "goal [x,y,z,r] = [" << mGoalX << ", \t" << mGoalY << ", \t" << \
+    mGoalZ << ", \t" << mGoalR << "]" << endl;
   cout << endl;
   return;
 }
@@ -248,8 +257,29 @@ bool Px4Drone::goLanding(void) {
   return mSetMode.response.mode_sent;
 }
 
+bool Px4Drone::goReturn(void) {
+  mSetMode.request.custom_mode = "AUTO.RTL";
+  mSetMode_client.call(mSetMode);
+  return mSetMode.response.mode_sent;
+}
+
+void Px4Drone::goForce(void) {
+  
+}
+
+void Px4Drone::goAccel(void) {
+  
+}
+
+void Px4Drone::goAngularVelocity(void) {
+  
+}
+
+void Px4Drone::goAttitude(void) {
+  
+}
+
 void Px4Drone::goVelocity(double xEast_mps_, double yNorth_mps_, double zUp_mps_, double headingCCW_deg_) {
-//TODO: param set MPC_XY_VEL_MAX, MPC_Z_VEL_MAX_UP, MPC_Z_VEL_MAX_DN
   geometry_msgs::TwistStamped targetVelocity;
   targetVelocity.twist.linear.x = xEast_mps_;
   targetVelocity.twist.linear.y = yNorth_mps_;
@@ -260,7 +290,6 @@ void Px4Drone::goVelocity(double xEast_mps_, double yNorth_mps_, double zUp_mps_
 }
 
 void Px4Drone::goVelocityBody(double xForward_mps_, double yLeft_mps_, double zUp_mps_, double headingCCW_deg_) {
-//TODO: param set MPC_XY_VEL_MAX, MPC_Z_VEL_MAX_UP, MPC_Z_VEL_MAX_DN
   geometry_msgs::TwistStamped targetVelocityBody;
   targetVelocityBody.twist.linear.x = \
     xForward_mps_ *cos(mCurRpy_rad.getZ()) - yLeft_mps_ *sin(mCurRpy_rad.getZ());
@@ -273,8 +302,6 @@ void Px4Drone::goVelocityBody(double xForward_mps_, double yLeft_mps_, double zU
 }
 
 void Px4Drone::goPosition(double xEast_m_, double yNorth_m_, double zUp_m_, double headingCCW_deg_) {
-//TODO: MPC_XY_VEL_MAX, MPC_Z_VEL_MAX_UP, MPC_Z_VEL_MAX_DN
-//TODO: make setAction seperately
   geometry_msgs::PoseStamped targetPosition;
   targetPosition.pose.position.x = xEast_m_;
   targetPosition.pose.position.y = yNorth_m_;
@@ -287,10 +314,11 @@ void Px4Drone::goPosition(double xEast_m_, double yNorth_m_, double zUp_m_, doub
 
 bool Px4Drone::doInitialization(ros::Rate rate_) {
   bool ackConnected = false;
-  bool ackComRCOverride = false;
-  bool ackTakeoffAlt = false;
-  bool ackTakeoffSpd = false;
-  bool ackLandSpd = false;
+  bool ackParamSet = false;
+  bool ackArmAccErr, ackArmGyroErr, ackArmMagErr, ackComRCOverride, \
+    ackGeofenceAction, ackGeofenceXY, ackGeofenceZ, \
+    ackTakeoffAlt, ackTakeoffSpd, ackLandSpd, \
+    ackXYMaxSpd, ackZUpMaxSpd, ackZDownMaxSpd;
 
   // wait for FCU connection
   while(ros::ok() && !(ackConnected)) {
@@ -301,17 +329,30 @@ bool Px4Drone::doInitialization(ros::Rate rate_) {
   cout << "FCU Connected" << endl;
 
   // set px4 parameters
+  ackArmAccErr = this->setParamWithAck("COM_ARM_IMU_ACC", mArmAccErr_mpss);
+  ackArmGyroErr = this->setParamWithAck("COM_ARM_IMU_GYR", mArmGyroErr_rps);
+  ackArmMagErr = this->setParamWithAck("COM_ARM_MAG_ANG", (int)mArmMagErr_deg);
   ackComRCOverride = this->setParamWithAck("COM_RC_OVERRIDE", \
-    (int)(mAutoOverride ? 1:0) | (mOffboardOverride ? 2:0));  
+    (int)(mAutoOverride ? 1:0) | (mOffboardOverride ? 2:0));
+  ackGeofenceAction = this->setParamWithAck("GF_ACTION", (int)mGeofenceAction);
+  ackGeofenceXY = this->setParamWithAck("GF_MAX_HOR_DIST", mGeofenceXY_m);
+  ackGeofenceZ = this->setParamWithAck("GF_MAX_VER_DIST", mGeofenceZ_m);
   ackTakeoffAlt = this->setParamWithAck("MIS_TAKEOFF_ALT", mTakeoffAlt_m);
   ackTakeoffSpd = this->setParamWithAck("MPC_TKO_SPEED", mTakeoffSpd_mps);
   ackLandSpd = this->setParamWithAck("MPC_LAND_SPEED", mLandSpd_mps);
+  ackXYMaxSpd = this->setParamWithAck("MPC_XY_VEL_MAX", mXYMaxSpd_mps);
+  ackZUpMaxSpd = this->setParamWithAck("MPC_Z_VEL_MAX_UP", mZUpMaxSpd_mps);
+  ackZDownMaxSpd = this->setParamWithAck("MPC_Z_VEL_MAX_DN", mZDownMaxSpd_mps);
 
-  if (ackComRCOverride && ackTakeoffAlt && ackTakeoffSpd && ackLandSpd) {
+  ackParamSet = ackArmAccErr && ackArmGyroErr && ackArmMagErr && ackComRCOverride && \
+    ackGeofenceAction && ackGeofenceXY && ackGeofenceZ && \
+    ackTakeoffAlt && ackTakeoffSpd && ackLandSpd && \
+    ackXYMaxSpd && ackZUpMaxSpd && ackZDownMaxSpd;
+  if (ackParamSet) {
     cout << "Px4 Params Set" << endl;
   }
 
-  return ackConnected && ackComRCOverride && ackTakeoffAlt && ackTakeoffSpd && ackLandSpd;
+  return ackConnected && ackParamSet;
 }
 
 void Px4Drone::doMission(int goalService_, double goalX_, double goalY_, double goalZ_, double goalR_, ros::Rate rate_) {

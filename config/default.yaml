@@ -1,13 +1,71 @@
+# http://docs.px4.io/master/en/advanced_config/parameter_reference.html
+#TODO: check if follow me mode is set by code
+
 Px4_Drone:
   Commander:
+    COM_ARM_IMU_ACC:  0.7
+    # (0.1 - 1.0)     0.7  [mpss]
+    # Maximum accelerometer inconsistency between IMU units that will allow arming
+
+    COM_ARM_IMU_GYR:  0.25
+    # (0.02 - 0.3)    0.25 [rps]
+    # Maximum rate gyro inconsistency between IMU units that will allow arming
+
+    COM_ARM_MAG_ANG: 45
+    # (3 - 180)      30    [deg]
+    # Maximum magnetic field inconsistency between units that will allow arming Set -1 to disable the check
+
+    # COM_RC_OVERRIDE (2 bits)
     COM_RC_OVERRIDE_AUTO: True
+    # (False - True) True
     COM_RC_OVERRIDE_OFFBOARD: True
+    # (False - True) False
     # Enable RC stick override of auto and/or offboard modes
+
+
+  Geofence:
+    GF_ACTION:        2
+    # (0 - 5)         1
+    # [0] None  [1] Warning [2] Hold mode [3] Return mode [4] Terminate [5] Land mode
+    # Geofence violation action
+    GF_MAX_HOR_DIST:  0.0
+    # (0 - 10000)     0.0
+    # [0.0] Disable
+    GF_MAX_VER_DIST:  0.0
+    # (0 - 10000)     0.0
+    # [0.0] Disable
+
+
+  Land_Detector:
+    LNDMC_ALT_MAX:  100.0
+    # (-1 - 10000)   -1.0
+    # [-1.0] Disable
+    # Maximum altitude for multicopters
+
+
   Mission:
-    MIS_TAKEOFF_ALT: 3.0
-    # Take-off altitude [m]
+    MIS_TAKEOFF_ALT:  3.0
+    # (0.0 - 80.0)    2.5  [m]
+    # Take-off altitude
+
+
   Multicopter_Position_Control:
-    MPC_TKO_SPEED: 1.0
-    # Takeoff climb rate [mps]
-    MPC_LAND_SPEED: 0.5
-    # Landing descend rate [mps]
+    MPC_TKO_SPEED:    1.0
+    # (1.0 - 5.0)     1.5  [mps]
+    # Takeoff climb rate
+
+    MPC_LAND_SPEED:   1.0
+    # (0.6 - )        0.7  [mps]
+    # Landing descend rate
+
+    MPC_XY_VEL_MAX:   4.0
+    # (0.0 - 20.0)   12.0  [mps]
+    # Maximum horizontal velocity
+
+    MPC_Z_VEL_MAX_UP: 1.0
+    # (0.5 - 8.0)     3.0  [mps]
+    # Maximum vertical ascent velocity
+
+    MPC_Z_VEL_MAX_DN: 1.0
+    # (0.5 - 4.0)     1.0  [mps]
+    # Maximum vertical descent velocity
