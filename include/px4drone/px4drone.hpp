@@ -24,7 +24,7 @@ constexpr double const_D2R() { return const_pi() / 180.0; }
 class Px4Drone {
  public:
   Px4Drone(ros::NodeHandle *nh_);
-  ~Px4Drone();
+  ~Px4Drone() = default;
 
   void cbState(const mavros_msgs::State::ConstPtr& msg_);
   void cbOdom(const nav_msgs::Odometry::ConstPtr& msg_);
@@ -56,12 +56,13 @@ class Px4Drone {
   bool goTakeOff(void);
   bool goLanding(void);
   bool goReturn(void);
+  bool goHold(void);
   void goForce(void);
   void goAccel(void);
   void goAngularVelocity(void);
   void goAttitude(void);
-  void goVelocity(double xEast_mps_, double yNorth_mps_, double zUp_mps_, double headingCCW_deg_);
-  void goVelocityBody(double xForward_mps_, double yLeft_mps_, double zUp_mps_, double headingCCW_deg_);
+  void goVelocity(double xEast_mps_, double yNorth_mps_, double zUp_mps_, double headingCCW_rps_);
+  void goVelocityBody(double xForward_mps_, double yLeft_mps_, double zUp_mps_, double headingCCW_rps_);
   void goPosition(double xEast_m_, double yNorth_m_, double zUp_m_, double headingCCW_deg_);
 
   bool doInitialization(ros::Rate rate_);

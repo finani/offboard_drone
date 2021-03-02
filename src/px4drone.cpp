@@ -1,7 +1,5 @@
 #include "px4drone/px4drone.hpp"
 
-using namespace std;
-
 Px4Drone::Px4Drone(ros::NodeHandle *nh_)
   : mCurPos_m(0,0,0),
     mCurVel_mps(0,0,0),
@@ -46,16 +44,16 @@ Px4Drone::Px4Drone(ros::NodeHandle *nh_)
   nh_->getParam("/Px4_Drone/Multicopter_Position_Control/MPC_Z_VEL_MAX_DN", mZDownMaxSpd_mps);
 }
 
-Px4Drone::~Px4Drone() {
-
-}
-
 void Px4Drone::cbState(const mavros_msgs::State::ConstPtr& msg_) {
+  ROS_INFO_ONCE_NAMED("px4drone", "<cbState> cbState start");
+
   mState = *msg_;
   return;
 }
 
 void Px4Drone::cbOdom(const nav_msgs::Odometry::ConstPtr& msg_) {
+  ROS_INFO_ONCE_NAMED("px4drone", "<cbOdom> cbOdom start");
+
   mOdom = *msg_;
 
   mCurPos_m.setValue(mOdom.pose.pose.position.x, 
@@ -90,8 +88,10 @@ void Px4Drone::cbOdom(const nav_msgs::Odometry::ConstPtr& msg_) {
 }
 
 void Px4Drone::cbGoalAction(const std_msgs::Float32MultiArray::ConstPtr& msg_) {
+  ROS_INFO_ONCE_NAMED("px4drone", "<cbGoalAction> cbGoalAction start");
+
   mGoalAction = *msg_;
-  mGoalService = (int)mGoalAction.data[0];
+  mGoalService = static_cast<int>(mGoalAction.data[0]);
   mGoalX = mGoalAction.data[1];
   mGoalY = mGoalAction.data[2];
   mGoalZ = mGoalAction.data[3];
@@ -100,46 +100,52 @@ void Px4Drone::cbGoalAction(const std_msgs::Float32MultiArray::ConstPtr& msg_) {
 }
 
 void Px4Drone::showState(void) {
-  static const string enum_system_status[9] = \
+  ROS_INFO_ONCE_NAMED("px4drone", "<showState> showState start");
+
+  static const std::string enum_system_status[9] = \
     {"UNINIT", "BOOT", "CALIBRATING", "STANDBY", "ACTIVE", 
     "CRITICAL", "EMERGENCY", "POWEROFF", "FLIGHT_TERMINATION"};
 
-  cout << endl;
-  cout << "\t[Px4Drone] State\t(/mavros/state)" << endl;
-  cout << "m_state.connected     = " << (mState.connected ? "OK!" : "Not yet!") << endl;
-  cout << "m_state.armed         = " << (mState.armed ? "OK!" : "Not yet!") << endl;
-  cout << "m_state.guided        = " << (mState.guided ? "OK!" : "Not yet!") << endl;
-  cout << "m_state.manual_input  = " << (mState.manual_input ? "OK!" : "Not yet!") << endl;
-  cout << "m_state.mode          = " << mState.mode << endl;
-  cout << "m_state.system_status = " << "MAV_STATE_" << enum_system_status[mState.system_status+1] << endl;
-  cout << endl;
+  std::cout << std::endl;
+  std::cout << "\t[Px4Drone] State\t(/mavros/state)" << std::endl;
+  std::cout << "m_state.connected     = " << (mState.connected ? "OK!" : "Not yet!") << std::endl;
+  std::cout << "m_state.armed         = " << (mState.armed ? "OK!" : "Not yet!") << std::endl;
+  std::cout << "m_state.guided        = " << (mState.guided ? "OK!" : "Not yet!") << std::endl;
+  std::cout << "m_state.manual_input  = " << (mState.manual_input ? "OK!" : "Not yet!") << std::endl;
+  std::cout << "m_state.mode          = " << mState.mode << std::endl;
+  std::cout << "m_state.system_status = " << "MAV_STATE_" << enum_system_status[mState.system_status+1] << std::endl;
+  std::cout << std::endl;
   return;
 }
 
 void Px4Drone::showOdom(void) {
-  cout << endl;
-  cout << "\t[Px4Drone] Odometry\t(/mavros/local_position/odom)" << endl;
-  cout << "m_odom.position_m [x,y,z]      = [" << mCurPos_m.getX() << \
-    ", \t" << mCurPos_m.getY() << ", \t" << mCurPos_m.getZ() << "]" << endl;
-  cout << "m_odom.velocity_mps [x,y,z]    = [" << mCurVel_mps.getX() << \
-    ", \t" << mCurVel_mps.getY() << ", \t" << mCurVel_mps.getZ() << "]" << endl;
-  cout << "m_odom.orientation_q [x,y,z,w] = [" << mCurQ.getX() << \
-    ", \t" << mCurQ.getY() << ", \t" << mCurQ.getZ() << ", \t" << mCurQ.getW() << "]" << endl;
-  cout << "m_odom.rpy_deg [r,p,y]         = [" << mCurRpy_deg.getX() << \
-    ", \t" << mCurRpy_deg.getY() << ", \t" << mCurRpy_deg.getZ() << "]" << endl;
-  cout << "m_odom.rpy_rate_rps [r,p,y]    = [" << mCurRpyRate_rps.getX() << \
-    ", \t" << mCurRpyRate_rps.getY() << ", \t" << mCurRpyRate_rps.getZ() << "]" << endl;
-  cout << endl;
+  ROS_INFO_ONCE_NAMED("px4drone", "<showOdom> showOdom start");
+
+  std::cout << std::endl;
+  std::cout << "\t[Px4Drone] Odometry\t(/mavros/local_position/odom)" << std::endl;
+  std::cout << "m_odom.position_m [x,y,z]      = [" << mCurPos_m.getX() << \
+    ", \t" << mCurPos_m.getY() << ", \t" << mCurPos_m.getZ() << "]" << std::endl;
+  std::cout << "m_odom.velocity_mps [x,y,z]    = [" << mCurVel_mps.getX() << \
+    ", \t" << mCurVel_mps.getY() << ", \t" << mCurVel_mps.getZ() << "]" << std::endl;
+  std::cout << "m_odom.orientation_q [x,y,z,w] = [" << mCurQ.getX() << \
+    ", \t" << mCurQ.getY() << ", \t" << mCurQ.getZ() << ", \t" << mCurQ.getW() << "]" << std::endl;
+  std::cout << "m_odom.rpy_deg [r,p,y]         = [" << mCurRpy_deg.getX() << \
+    ", \t" << mCurRpy_deg.getY() << ", \t" << mCurRpy_deg.getZ() << "]" << std::endl;
+  std::cout << "m_odom.rpy_rate_rps [r,p,y]    = [" << mCurRpyRate_rps.getX() << \
+    ", \t" << mCurRpyRate_rps.getY() << ", \t" << mCurRpyRate_rps.getZ() << "]" << std::endl;
+  std::cout << std::endl;
   return;
 }
 
 void Px4Drone::showGoalAction(void) {
-  cout << endl;
-  cout << "\t[Px4Drone] GoalAction\t(/GoalAction)" << endl;
-  cout << "goal_service    = [" << mGoalService << endl;
-  cout << "goal [x,y,z,r] = [" << mGoalX << ", \t" << mGoalY << ", \t" << \
-    mGoalZ << ", \t" << mGoalR << "]" << endl;
-  cout << endl;
+  ROS_INFO_ONCE_NAMED("px4drone", "<showGoalAction> showGoalAction start");
+
+  std::cout << std::endl;
+  std::cout << "\t[Px4Drone] GoalAction\t(/GoalAction)" << std::endl;
+  std::cout << "goal_service    = [" << mGoalService << std::endl;
+  std::cout << "goal [x,y,z,r] = [" << mGoalX << ", \t" << mGoalY << ", \t" << \
+    mGoalZ << ", \t" << mGoalR << "]" << std::endl;
+  std::cout << std::endl;
   return;
 }
 
@@ -175,7 +181,8 @@ float Px4Drone::getRosRate(void) {
   return mRosRate;
 }
 
-bool Px4Drone::setParamWithAck(string param_id_, int value_) {
+//TODO: use Template including int, float
+bool Px4Drone::setParamWithAck(std::string param_id_, int value_) {
   mavros_msgs::ParamSet paramSet;
   mavros_msgs::ParamGet paramGet;
 
@@ -189,7 +196,7 @@ bool Px4Drone::setParamWithAck(string param_id_, int value_) {
     (value_ == paramGet.response.value.integer);
 }
 
-bool Px4Drone::setParamWithAck(string param_id_, float value_) {
+bool Px4Drone::setParamWithAck(std::string param_id_, float value_) {
   mavros_msgs::ParamSet paramSet;
   mavros_msgs::ParamGet paramGet;
 
@@ -263,6 +270,12 @@ bool Px4Drone::goReturn(void) {
   return mSetMode.response.mode_sent;
 }
 
+bool Px4Drone::goHold(void) {
+  mSetMode.request.custom_mode = "AUTO.LOITER";
+  mSetMode_client.call(mSetMode);
+  return mSetMode.response.mode_sent;
+}
+
 void Px4Drone::goForce(void) {
   
 }
@@ -279,24 +292,24 @@ void Px4Drone::goAttitude(void) {
   
 }
 
-void Px4Drone::goVelocity(double xEast_mps_, double yNorth_mps_, double zUp_mps_, double headingCCW_deg_) {
+void Px4Drone::goVelocity(double xEast_mps_, double yNorth_mps_, double zUp_mps_, double headingCCW_rps_) {
   geometry_msgs::TwistStamped targetVelocity;
   targetVelocity.twist.linear.x = xEast_mps_;
   targetVelocity.twist.linear.y = yNorth_mps_;
   targetVelocity.twist.linear.z = zUp_mps_;
-  targetVelocity.twist.angular.z = headingCCW_deg_;
+  targetVelocity.twist.angular.z = headingCCW_rps_;
   mCmdVel_pub.publish(targetVelocity);
   return;
 }
 
-void Px4Drone::goVelocityBody(double xForward_mps_, double yLeft_mps_, double zUp_mps_, double headingCCW_deg_) {
+void Px4Drone::goVelocityBody(double xForward_mps_, double yLeft_mps_, double zUp_mps_, double headingCCW_rps_) {
   geometry_msgs::TwistStamped targetVelocityBody;
   targetVelocityBody.twist.linear.x = \
     xForward_mps_ *cos(mCurRpy_rad.getZ()) - yLeft_mps_ *sin(mCurRpy_rad.getZ());
   targetVelocityBody.twist.linear.y = \
     xForward_mps_ *sin(mCurRpy_rad.getZ()) + yLeft_mps_ *cos(mCurRpy_rad.getZ());
   targetVelocityBody.twist.linear.z = zUp_mps_;
-  targetVelocityBody.twist.angular.z = headingCCW_deg_;
+  targetVelocityBody.twist.angular.z = headingCCW_rps_;
   mCmdVel_pub.publish(targetVelocityBody);
   return;
 }
@@ -313,6 +326,8 @@ void Px4Drone::goPosition(double xEast_m_, double yNorth_m_, double zUp_m_, doub
 }
 
 bool Px4Drone::doInitialization(ros::Rate rate_) {
+  ROS_INFO_NAMED("px4drone", "<doInitialization> doInitialization start");
+
   bool ackConnected = false;
   bool ackParamSet = false;
   bool ackArmAccErr, ackArmGyroErr, ackArmMagErr, ackComRCOverride, \
@@ -321,20 +336,20 @@ bool Px4Drone::doInitialization(ros::Rate rate_) {
     ackXYMaxSpd, ackZUpMaxSpd, ackZDownMaxSpd;
 
   // wait for FCU connection
-  while(ros::ok() && !(ackConnected)) {
+  while(ros::ok() && !(ackConnected == true)) {
     ackConnected = mState.connected;
     ros::spinOnce();
     rate_.sleep();
   }
-  cout << "FCU Connected" << endl;
+  ROS_INFO_NAMED("px4drone", "<doInitialization> FCU Connected");
 
   // set px4 parameters
   ackArmAccErr = this->setParamWithAck("COM_ARM_IMU_ACC", mArmAccErr_mpss);
   ackArmGyroErr = this->setParamWithAck("COM_ARM_IMU_GYR", mArmGyroErr_rps);
-  ackArmMagErr = this->setParamWithAck("COM_ARM_MAG_ANG", (int)mArmMagErr_deg);
+  ackArmMagErr = this->setParamWithAck("COM_ARM_MAG_ANG", static_cast<int>(mArmMagErr_deg));
   ackComRCOverride = this->setParamWithAck("COM_RC_OVERRIDE", \
-    (int)(mAutoOverride ? 1:0) | (mOffboardOverride ? 2:0));
-  ackGeofenceAction = this->setParamWithAck("GF_ACTION", (int)mGeofenceAction);
+    static_cast<int>(mAutoOverride ? 1:0) | (mOffboardOverride ? 2:0));
+  ackGeofenceAction = this->setParamWithAck("GF_ACTION", static_cast<int>(mGeofenceAction));
   ackGeofenceXY = this->setParamWithAck("GF_MAX_HOR_DIST", mGeofenceXY_m);
   ackGeofenceZ = this->setParamWithAck("GF_MAX_VER_DIST", mGeofenceZ_m);
   ackTakeoffAlt = this->setParamWithAck("MIS_TAKEOFF_ALT", mTakeoffAlt_m);
@@ -348,14 +363,18 @@ bool Px4Drone::doInitialization(ros::Rate rate_) {
     ackGeofenceAction && ackGeofenceXY && ackGeofenceZ && \
     ackTakeoffAlt && ackTakeoffSpd && ackLandSpd && \
     ackXYMaxSpd && ackZUpMaxSpd && ackZDownMaxSpd;
-  if (ackParamSet) {
-    cout << "Px4 Params Set" << endl;
+  if (ackParamSet == true) {
+    ROS_INFO_NAMED("px4drone", "<doInitialization> Px4 Params Set");
   }
 
   return ackConnected && ackParamSet;
 }
 
 void Px4Drone::doMission(int goalService_, double goalX_, double goalY_, double goalZ_, double goalR_, ros::Rate rate_) {
+  ROS_INFO_ONCE_NAMED("px4drone", "<doMission> doMission start");
+
+  bool ackGoTakeoff = false;
+  bool ackSetOffboard = false;
 //TODO: check if states have changed
 //TODO: fix takeoff while takeoff
   switch (goalService_) {
@@ -363,54 +382,71 @@ void Px4Drone::doMission(int goalService_, double goalX_, double goalY_, double 
       break;
 
     case 0: // Auto arm(POSCTL) - Takeoff - OFFBOARD
-      // wait for POSCTL Mode
-      this->setPosctl();
-      while(ros::ok() && !(mState.mode == "POSCTL")) {
-        ros::spinOnce();
-        rate_.sleep();
+      //TODO: check why "POSCTL Mode" is on the screen many times
+      if(mState.armed == false) {
+        // wait for POSCTL Mode
+        this->setPosctl();
+        while(ros::ok() && !(mState.mode == "POSCTL")) {
+          ros::spinOnce();
+          rate_.sleep();
+        }
+        std::cout << "POSCTL Mode" << std::endl;
+        
+        // wait for Arming
+        this->setArm();
+        while(ros::ok() && mState.armed) {
+          ros::spinOnce();
+          rate_.sleep();
+        }
+        std::cout << "Armed" << std::endl;
       }
-      cout << "POSCTL Mode" << endl;
-      
-      // wait for Arming
-      this->setArm();
-      while(ros::ok() && mState.armed) {
-        ros::spinOnce();
-        rate_.sleep();
-      }
-      cout << "Armed" << endl;
 
+      //TODO: check if the asserts should be here or in the set/go methods
       // wait for TakeOff
-      this->goTakeOff();
-      while(ros::ok() && !(mState.mode == "AUTO.LOITER")) {
-        ros::spinOnce();
-        rate_.sleep();
+      if (ackGoTakeoff == false) {
+        ackGoTakeoff = this->goTakeOff();
+        ROS_ASSERT_CMD(ackGoTakeoff == true, \
+          this->goLanding(); \
+          ROS_FATAL_NAMED("px4drone", "<doMission> Take Off Fail"); \
+          ROS_INFO_NAMED("px4drone", "<doMission> goLanding start"); \
+          ROS_BREAK());
       }
-      cout << "TakeOff" << endl;
+      else {
+        ROS_INFO_NAMED("px4drone", "<doMission> TakeOff");
+      }
 
       // wait for OFFBOARD Mode
-      while(ros::ok() && !this->setOffboard()) {
-        ros::spinOnce();
-        rate_.sleep();
+      if (ackSetOffboard == false) {
+        ackSetOffboard = this->setOffboard();
+        ROS_ASSERT_CMD(ackSetOffboard == true, \
+          this->goLanding(); \
+          ROS_FATAL_NAMED("px4drone", "<doMission> OFFBOARD Mode Fail"); \
+          ROS_INFO_NAMED("px4drone", "<doMission> goLanding start"); \
+          ROS_BREAK());
       }
-      cout << "OFFBOARD Mode" << endl;
+      else {
+        ROS_INFO_NAMED("px4drone", "<doMission> OFFBOARD Mode");
+      }
       break;
 
     case 1: // Auto arm(POSCTL) - takeoff
-      // wait for POSCTL Mode
-      this->setPosctl();
-      while(ros::ok() && !(mState.mode == "POSCTL")) {
-        ros::spinOnce();
-        rate_.sleep();
-      }
-      cout << "POSCTL Mode" << endl;
+      if(mState.armed == false) { // Arming Request
+        // wait for POSCTL Mode
+        this->setPosctl();
+        while(ros::ok() && !(mState.mode == "POSCTL")) {
+          ros::spinOnce();
+          rate_.sleep();
+        }
+        std::cout << "POSCTL Mode" << std::endl;
 
-      // wait for Arming
-      this->setArm();
-      while(ros::ok() && !mState.armed) {
-        ros::spinOnce();
-        rate_.sleep();
+        // wait for Arming
+        this->setArm();
+        while(ros::ok() && !mState.armed) {
+          ros::spinOnce();
+          rate_.sleep();
+        }
+        std::cout << "Armed" << std::endl;
       }
-      cout << "Armed" << endl;
 
       // wait for TakeOff
       this->goTakeOff();
@@ -418,7 +454,7 @@ void Px4Drone::doMission(int goalService_, double goalX_, double goalY_, double 
         ros::spinOnce();
         rate_.sleep();
       }
-      cout << "TakeOff" << endl;
+      std::cout << "TakeOff" << std::endl;
       break;
 
     case 2: // Auto landing - disarm
@@ -428,7 +464,7 @@ void Px4Drone::doMission(int goalService_, double goalX_, double goalY_, double 
         ros::spinOnce();
         rate_.sleep();
       }
-      cout << "Landing" << endl;
+      std::cout << "Landing" << std::endl;
 
       // Auto disarming 2seconds after landing
       break;
@@ -462,18 +498,20 @@ void Px4Drone::doMission(int goalService_, double goalX_, double goalY_, double 
 
     default: // Emergency - POSCTL Mode
       // wait for POSCTL Mode
-      this->setPosctl();
-      while(ros::ok() && !(mState.mode == "POSCTL")){
+      this->goHold();
+      while(ros::ok() && !(mState.mode == "AUTO.LOITER")){
         ros::spinOnce();
         rate_.sleep();
       }
-      cout << "POSCTL Mode" << endl;
+      std::cout << "Hold(Loiter) Mode" << std::endl;
       break;
   }
   return;
 }
 
 void Px4Drone::pubRvizTopics(void) {
+  ROS_INFO_ONCE_NAMED("px4drone", "<pubRvizTopics> pubRvizTopics start");
+
   static nav_msgs::Path uavPath;
   geometry_msgs::PoseStamped curPos;
   curPos.pose = mOdom.pose.pose;

@@ -1,7 +1,5 @@
 #include "px4drone/px4drone.hpp"
 
-#include <iostream>
-
 using namespace std;
 
 int main(int argc, char **argv)
@@ -14,23 +12,22 @@ int main(int argc, char **argv)
   ros::Rate rate(px4drone.getRosRate());
 
   // wait for Initialization
-  while(ros::ok() && !px4drone.doInitialization(rate)) {
-    ros::spinOnce();
-    rate.sleep();
-  } 
+  // bool ackDoInitialization = px4drone.doInitialization(rate); //TODO: check if it is needed
+  ROS_ASSERT_MSG(px4drone.doInitialization(rate) == true, "Initialization Fail");
 
-  //TODO: rosparam -> On/Off
   // px4drone.doMission(0, #, #, #, #, rate); // Auto arm(POSCTL) - Takeoff - OFFBOARD
 
-  cout << "main loop start" << endl;
+  ROS_INFO_NAMED("offboard_node", "<offboard_node> main loop start");
   while(ros::ok())
   {
     // system("clear");
-    //TODO: rosparam -> On/Off
+    //TODO: rosparam -> On/Off or launch args and make seperate monitor launch
     // px4.drone.showHelp();
-    //TODO: rosparam -> On/Off
-    px4drone.showState();
-    px4drone.showOdom();
+    //TODO: rosparam -> On/Off or launch args and make seperate monitor launch
+
+    // px4drone.showState();
+    // px4drone.showOdom();
+    // px4drone.showGoalAction();
 
     // px4drone.doMission(23, 1, 2, 3, 45, rate);
     px4drone.doMission(px4drone.getGoalService(), px4drone.getGoalX(), px4drone.getGoalY(), px4drone.getGoalZ(), px4drone.getGoalR(), rate);
