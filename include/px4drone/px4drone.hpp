@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <string>
+#include <vector>
 
 #include <ros/ros.h>
 #include <tf/transform_broadcaster.h>
@@ -30,9 +31,9 @@ class Px4Drone {
   void cbOdom(const nav_msgs::Odometry::ConstPtr& msg_);
   void cbGoalAction(const std_msgs::Float32MultiArray::ConstPtr& msg_);
 
-  void showState(void);
-  void showOdom(void);
-  void showGoalAction(void);
+  void showState(void) const;
+  void showOdom(void) const;
+  void showGoalAction(void) const;
 
   mavros_msgs::State getState(void);
   nav_msgs::Odometry getOdom();
@@ -61,12 +62,12 @@ class Px4Drone {
   void goAccel(double xForward_mpss_, double y_Left_mpss_, double z_Up_mpss_);
   void goAngularVelocity(void);
   void goAttitude(void);
-  void goVelocity(double xEast_mps_, double yNorth_mps_, double zUp_mps_, double headingCCW_rps_);
-  void goVelocityBody(double xForward_mps_, double yLeft_mps_, double zUp_mps_, double headingCCW_rps_);
+  void goVelocity(double xEast_mps_, double yNorth_mps_, double zUp_mps_, double headingCCW_dps_);
+  void goVelocityBody(double xForward_mps_, double yLeft_mps_, double zUp_mps_, double headingCCW_dps_);
   void goPosition(double xEast_m_, double yNorth_m_, double zUp_m_, double headingCCW_deg_);
 
   bool doInitialization(ros::Rate rate_);
-  void doMission(int goalService_, double goalX_, double goalY_, double goalZ_, double goalR_, ros::Rate rate_);
+  void doMission(int goalService_, double goalX_, double goalY_, double goalZ_, double goalR_);
 
   void pubRvizTopics(void);
 
@@ -90,6 +91,7 @@ class Px4Drone {
   mavros_msgs::ParamSet mParamSet;
   mavros_msgs::ParamGet mParamGet;
 
+  std::vector<std::string> mSystemStatusVector;
   tf::Vector3 mCurPos_m;
   tf::Vector3 mCurVel_mps;
   tf::Quaternion mCurQ;
@@ -104,7 +106,13 @@ class Px4Drone {
   double mGoalZ;
   double mGoalR;
   float mRosRate;
+  bool mShowState;
+  bool mShowOdom;
+  bool mShowGoalAction;
+  bool mPubRvizTopics;
+  bool mEnableAutoTakeoff;
 
+  bool mReverseThrust;
   float mArmAccErr_mpss;
   float mArmGyroErr_rps;
   int mArmMagErr_deg;

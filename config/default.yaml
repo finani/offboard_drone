@@ -2,6 +2,40 @@
 #TODO: check if follow me mode is set by code
 
 Px4_Drone:
+  ROS:
+    ROS_RATE:        50
+    # (0 - )         20 [Hz]
+    # Ros rate (loop rate)
+
+
+  USER:
+    SHOW_STATE: False
+    # (False - True) False
+    # Show State (mavros_msgs::State)
+
+    SHOW_ODOM: False
+    # (False - True) False
+    # Show Odometry ( nav_msgs::Odometry)
+
+    SHOW_GOAL_ACTION: False
+    # (False - True) False
+    # Show GoalAction (std_msgs::Float32MultiArray)
+
+    PUB_RVIZ_TOPICS: False
+    # (False - True) False
+    # Publish RViz Topics (nav_msgs::Path, visualization_msgs::Marker)
+
+    ENABLE_AUTO_TAKEOFF: True
+    # (False - True) False
+    # Enable Auto Takeoff. It will set false after auto takeoff
+
+
+  MAVROS:
+    REVERSE_THRUST: False
+    # (False - True) False
+    # Enable bidirectional thrust
+
+
   Commander:
     COM_ARM_IMU_ACC:  0.7
     # (0.1 - 1.0)     0.7  [mpss]
@@ -28,9 +62,11 @@ Px4_Drone:
     # (0 - 5)         1
     # [0] None  [1] Warning [2] Hold mode [3] Return mode [4] Terminate [5] Land mode
     # Geofence violation action
+
     GF_MAX_HOR_DIST:  0.0
     # (0 - 10000)     0.0
     # [0.0] Disable
+
     GF_MAX_VER_DIST:  0.0
     # (0 - 10000)     0.0
     # [0.0] Disable
