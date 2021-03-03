@@ -11,9 +11,11 @@ int main(int argc, char **argv)
   Px4Drone px4drone = Px4Drone(&nh);
   ros::Rate rate(px4drone.getRosRate());
 
-  // wait for Initialization
-  // bool ackDoInitialization = px4drone.doInitialization(rate); //TODO: check if it is needed
-  ROS_ASSERT_MSG(px4drone.doInitialization(rate) == true, "Initialization Fail");
+  // do Initialization
+  ROS_ASSERT_CMD(px4drone.doInitialization(rate) == true, \
+    ROS_FATAL_NAMED("offboard_node", "<offboard_node> Initialization Fail"); \
+    ROS_BREAK());
+  ROS_INFO_NAMED("offboard_node", "<offboard_node> Initialization Done");
 
   // px4drone.doMission(0, #, #, #, #, rate); // Auto arm(POSCTL) - Takeoff - OFFBOARD
 

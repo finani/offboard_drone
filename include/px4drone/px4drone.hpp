@@ -57,8 +57,8 @@ class Px4Drone {
   bool goLanding(void);
   bool goReturn(void);
   bool goHold(void);
-  void goForce(void);
-  void goAccel(void);
+  void goForce(double xForward_N_, double y_Left_N_, double z_Up_N_);
+  void goAccel(double xForward_mpss_, double y_Left_mpss_, double z_Up_mpss_);
   void goAngularVelocity(void);
   void goAttitude(void);
   void goVelocity(double xEast_mps_, double yNorth_mps_, double zUp_mps_, double headingCCW_rps_);
