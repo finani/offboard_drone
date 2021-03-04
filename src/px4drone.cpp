@@ -1,5 +1,5 @@
 #include "px4drone/px4drone.hpp"
-//TODO: check if const is added
+
 Px4Drone::Px4Drone(ros::NodeHandle *nh_)
   : mSystemStatusVector({"UNINIT", "BOOT", "CALIBRATING", "STANDBY", "ACTIVE", \
       "CRITICAL", "EMERGENCY", "POWEROFF", "FLIGHT_TERMINATION"}),
@@ -20,7 +20,8 @@ Px4Drone::Px4Drone(ros::NodeHandle *nh_)
     mShowState(false),
     mShowOdom(false),
     mShowGoalAction(false),
-    mPubRvizTopics(false)
+    mPubRvizTopics(false),
+    mEnableAutoTakeoff(false)
 {
   mState_sub = nh_->subscribe ("/mavros/state", 10, &Px4Drone::cbState, this);
   mOdom_sub = nh_->subscribe ("/mavros/local_position/odom", 10, &Px4Drone::cbOdom, this);
@@ -56,7 +57,8 @@ Px4Drone::Px4Drone(ros::NodeHandle *nh_)
   nh_->getParam("/Px4_Drone/Multicopter_Position_Control/MPC_Z_VEL_MAX_UP", mZUpMaxSpd_mps);
   nh_->getParam("/Px4_Drone/Multicopter_Position_Control/MPC_Z_VEL_MAX_DN", mZDownMaxSpd_mps);
 
-  nh_->setParam("/mavros/setpoint_attitude/reverse_thrust", mReverseThrust); //TODO: check if it is working (reverse_throttle)
+  //TODO: check if it is working (reverse_throttle)
+  nh_->setParam("/mavros/setpoint_attitude/reverse_thrust", mReverseThrust);
 }
 
 void Px4Drone::cbState(const mavros_msgs::State::ConstPtr& msg_) {
@@ -175,35 +177,35 @@ void Px4Drone::showGoalAction(void) const {
   return;
 }
 
-mavros_msgs::State Px4Drone::getState(void) {
+mavros_msgs::State Px4Drone::getState(void) const {
   return mState;
 }
 
-nav_msgs::Odometry Px4Drone::getOdom(void) {
+nav_msgs::Odometry Px4Drone::getOdom(void) const {
   return mOdom;
 }
 
-float Px4Drone::getGoalService(void) {
+float Px4Drone::getGoalService(void) const {
   return mGoalService;
 }
 
-float Px4Drone::getGoalX(void) {
+float Px4Drone::getGoalX(void) const {
   return mGoalX;
 }
 
-float Px4Drone::getGoalY(void) {
+float Px4Drone::getGoalY(void) const {
   return mGoalY;
 }
 
-float Px4Drone::getGoalZ(void) {
+float Px4Drone::getGoalZ(void) const {
   return mGoalZ;
 }
 
-float Px4Drone::getGoalR(void) {
+float Px4Drone::getGoalR(void) const {
   return mGoalR;
 }
 
-float Px4Drone::getRosRate(void) {
+float Px4Drone::getRosRate(void) const {
   return mRosRate;
 }
 
@@ -361,7 +363,7 @@ bool Px4Drone::setOffboard(void) {
     ROS_FATAL_NAMED("px4drone", "[setOffboard] OFFBOARD Mode Set Failed"); \
     ROS_INFO_NAMED("px4drone", "[setOffboard] goHold start"); \
     ROS_BREAK());
-  ROS_INFO_NAMED("px4drone", "[setOffboard] OFFBOARD Mode Sent");
+  ROS_INFO_THROTTLE_NAMED(1.0, "px4drone", "[setOffboard] OFFBOARD Mode Sent");
 
   return ackSetOffboard;
 }
@@ -578,40 +580,71 @@ void Px4Drone::doMission(int goalService_, double goalX_, double goalY_, double 
     case 11: // Force control
       // go Force
       this->goForce(goalX_, goalY_, goalZ_); // , goalR_
+      // set OFFBOARD Mode
+      if (!(mState.mode == "OFFBOARD") && \
+        (mSystemStatusVector[static_cast<int>(mState.system_status)] == "ACTIVE")) {
+        this->setOffboard();
+      }
       break;
 
     case 12: // Acceleration control
       // go Accel
       this->goAccel(goalX_, goalY_, goalZ_); // , goalR_
+      // set OFFBOARD Mode
+      if (!(mState.mode == "OFFBOARD") && \
+        (mSystemStatusVector[static_cast<int>(mState.system_status)] == "ACTIVE")) {
+        this->setOffboard();
+      }
       break;
 
     case 13: // Angular velocity control
       // go AngularVelocity
 //      this->goAngularVelocity(goalX_, goalY_, goalZ_, goalR_, goalT_);
+      // set OFFBOARD Mode
+      if (!(mState.mode == "OFFBOARD") && \
+        (mSystemStatusVector[static_cast<int>(mState.system_status)] == "ACTIVE")) {
+        this->setOffboard();
+      }
       break;
 
     case 14: // Attitude control
       // go Attitude
 //      this->goAngularVelocity(goalX_, goalY_, goalZ_, goalW_, goalT_);
+      // set OFFBOARD Mode
+      if (!(mState.mode == "OFFBOARD") && \
+        (mSystemStatusVector[static_cast<int>(mState.system_status)] == "ACTIVE")) {
+        this->setOffboard();
+      }
       break;
 
     case 21: // Velocity control
       // x_east_mps, y_north_mps, z_up_mps, heading_CCW_dps
       this->goVelocity(goalX_, goalY_, goalZ_, goalR_);
+      // set OFFBOARD Mode
+      if (!(mState.mode == "OFFBOARD") && \
+        (mSystemStatusVector[static_cast<int>(mState.system_status)] == "ACTIVE")) {
+        this->setOffboard();
+      }
       break;
 
     case 22: // Velocity Body control
       // x_forward_mps, y_left_mps, z_up_mps, heading_CCW_dps
       this->goVelocityBody(goalX_, goalY_, goalZ_, goalR_);
+      // set OFFBOARD Mode
+      if (!(mState.mode == "OFFBOARD") && \
+        (mSystemStatusVector[static_cast<int>(mState.system_status)] == "ACTIVE")) {
+        this->setOffboard();
+      }
       break;
 
     case 23: // Position control
-      // set OFFBOARD Mode
-      if (mSystemStatusVector[static_cast<int>(mState.system_status)] == "ACTIVE") { //TODO: check if this line is needed
-        this->setOffboard();
-      }
       // x_east_m, y_north_m, z_up_m, heading_CCW_deg
       this->goPosition(goalX_, goalY_, goalZ_, goalR_);
+      // set OFFBOARD Mode
+      if (!(mState.mode == "OFFBOARD") && \
+        (mSystemStatusVector[static_cast<int>(mState.system_status)] == "ACTIVE")) {
+        this->setOffboard();
+      }
       break;
 
     default: // Emergency - HOLD Mode
@@ -622,7 +655,7 @@ void Px4Drone::doMission(int goalService_, double goalX_, double goalY_, double 
   return;
 }
 
-void Px4Drone::pubRvizTopics(void) {
+void Px4Drone::pubRvizTopics(void) const {
   if (mPubRvizTopics == true) {
     ROS_INFO_ONCE_NAMED("px4drone", "[pubRvizTopics] pubRvizTopics Turn On");
 

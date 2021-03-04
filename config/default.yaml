@@ -1,5 +1,4 @@
 # http://docs.px4.io/master/en/advanced_config/parameter_reference.html
-#TODO: check if follow me mode is set by code
 
 Px4_Drone:
   ROS:
@@ -105,3 +104,5 @@ Px4_Drone:
     MPC_Z_VEL_MAX_DN: 1.0
     # (0.5 - 4.0)     1.0  [mps]
     # Maximum vertical descent velocity
+
+    //TODO: Add control gain values

@@ -35,14 +35,14 @@ class Px4Drone {
   void showOdom(void) const;
   void showGoalAction(void) const;
 
-  mavros_msgs::State getState(void);
-  nav_msgs::Odometry getOdom();
-  float getGoalService(void);
-  float getGoalX(void);
-  float getGoalY(void);
-  float getGoalZ(void);
-  float getGoalR(void);
-  float getRosRate(void);
+  mavros_msgs::State getState(void) const;
+  nav_msgs::Odometry getOdom() const;
+  float getGoalService(void) const;
+  float getGoalX(void) const;
+  float getGoalY(void) const;
+  float getGoalZ(void) const;
+  float getGoalR(void) const;
+  float getRosRate(void) const;
 
   bool setParamWithAck(std::string param_id_, int value_);
   bool setParamWithAck(std::string param_id_, float value_);
@@ -69,7 +69,7 @@ class Px4Drone {
   bool doInitialization(ros::Rate rate_);
   void doMission(int goalService_, double goalX_, double goalY_, double goalZ_, double goalR_);
 
-  void pubRvizTopics(void);
+  void pubRvizTopics(void) const;
 
  private:
   ros::Subscriber mState_sub;

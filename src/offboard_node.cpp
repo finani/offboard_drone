@@ -1,10 +1,8 @@
 #include "px4drone/px4drone.hpp"
 
-using namespace std;
-
 int main(int argc, char **argv)
 {
-  cout << fixed << setprecision(2);
+  std::cout << std::fixed << std::setprecision(2);
 
   ros::init(argc, argv, "offboard_node");
   ros::NodeHandle nh;
@@ -22,11 +20,6 @@ int main(int argc, char **argv)
   ROS_INFO_NAMED("offboard_node", "\t[offboard_node] main loop start");
   while(ros::ok())
   {
-    // system("clear");
-    //TODO: rosparam -> On/Off or launch args and make seperate monitor launch
-    // px4.drone.showHelp();
-    //TODO: rosparam -> On/Off or launch args and make seperate monitor launch
-
     px4drone.showState();
     px4drone.showOdom();
     px4drone.showGoalAction();
@@ -34,7 +27,6 @@ int main(int argc, char **argv)
 
     // px4drone.doMission(23, 1, 2, 3, 45, rate);
     px4drone.doMission(px4drone.getGoalService(), px4drone.getGoalX(), px4drone.getGoalY(), px4drone.getGoalZ(), px4drone.getGoalR());
-    //TODO: pub with rate keep calling doMission
 
     ros::spinOnce();
     rate.sleep();
