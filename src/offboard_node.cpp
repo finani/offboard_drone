@@ -15,17 +15,16 @@ int main(int argc, char **argv)
     ROS_BREAK());
   ROS_INFO_NAMED("offboard_node", "\t[offboard_node] Initialization Done");
 
-  // px4drone.doMission(0, #, #, #, #, rate); // Auto arm(POSCTL) - Takeoff - OFFBOARD
-
-  ROS_INFO_NAMED("offboard_node", "\t[offboard_node] main loop start");
   while(ros::ok())
   {
+    ROS_INFO_ONCE_NAMED("offboard_node", "\t[offboard_node] main loop start");
+
     px4drone.showState();
     px4drone.showOdom();
     px4drone.showGoalAction();
     px4drone.pubRvizTopics();
 
-    // px4drone.doMission(23, 1, 2, 3, 45, rate);
+    // px4drone.doMission(23, 1, 2, 3, 45);
     px4drone.doMission(px4drone.getGoalService(), px4drone.getGoalX(), px4drone.getGoalY(), px4drone.getGoalZ(), px4drone.getGoalR());
 
     ros::spinOnce();
