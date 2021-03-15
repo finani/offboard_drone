@@ -28,6 +28,11 @@ Px4_Drone:
     # (False - True) False
     # Enable Auto Takeoff. It will set false after auto takeoff
 
+  #TODO: add this function
+    ENABLE_CUSTOM_GAIN: False
+    # (False - True) False
+    # Enable gain parameters from this yaml file.
+
 
   MAVROS:
     REVERSE_THRUST: False
@@ -72,7 +77,7 @@ Px4_Drone:
 
 
   Land_Detector:
-    LNDMC_ALT_MAX:  100.0
+    LNDMC_ALT_MAX:   50.0
     # (-1 - 10000)   -1.0
     # [-1.0] Disable
     # Maximum altitude for multicopters
@@ -82,6 +87,39 @@ Px4_Drone:
     MIS_TAKEOFF_ALT:  3.0
     # (0.0 - 80.0)    2.5  [m]
     # Take-off altitude
+
+
+  Multicopter_Attitude_Control:
+    MC_PITCHRATE_MAX: 220.0
+    # (0.0 - 1800.0, 5)  220.0 [rad/s]
+    # Max pitch rate
+    # Limit for pitch rate in manual and auto modes (except acro)
+
+    MC_PITCH_P: 6.5
+    # (0.0 - 12.0, 0.1) 6.5 [Hz]
+    # Pitch P gain
+
+    MC_ROLLRATE_MAX: 220.0
+    # (0.0 - 1800.0, 5)  220.0 [rad/s]
+    # Max roll rate
+    # Limit for roll rate in manual and auto modes (except acro)
+
+    MC_ROLL_P: 6.5
+    # (0.0 - 12.0, 0.1) 6.5 [Hz]
+    # Roll P gain
+
+    MC_YAWRATE_MAX: 200.0
+    # (0.0 - 1800.0, 5) 200.0 [rad/s]
+    # Max yaw rate
+
+    MC_YAW_P: 2.8
+    # (0.0 - 5.0, 0.1) 2.8 [Hz]
+    # Yaw P gain
+
+    MC_YAW_WEIGHT: 0.4
+    # (0.0 - 1.0, 0.1) 0.4 [Hz]
+    # Yaw weight
+    # Deprioritizing yaw compared to roll and pitch in non-linear attitude control
 
 
   Multicopter_Position_Control:
@@ -105,4 +143,80 @@ Px4_Drone:
     # (0.5 - 4.0)     1.0  [mps]
     # Maximum vertical descent velocity
 
-    //TODO: Add control gain values
+
+  Multicopter_Rate_Control:
+    MC_PITCHRATE_K: 1.0
+    # (0.01 - 5.0, 0.0005) 1.0
+    # Pitch rate controller gain
+
+    MC_PITCHRATE_P: 0.15
+    # (0.01 - 0.6, 0.01) 0.15
+    # Pitch rate P gain
+
+    MC_PITCHRATE_I: 0.2
+    # (0.01 - , 0.01) 0.2
+    # Pitch rate I gain
+
+    MC_PITCHRATE_D: 0.003
+    # (0.01 - , 0.0005) 0.003
+    # Pitch rate D gain
+
+    MC_PITCHRATE_FF: 0.0
+    # (0.0 - ) 0.0
+    # Pitch rate feedforwad
+
+    MC_PR_INT_LIM: 0.30
+    # (0.0 - , 0.01) 0.30
+    # Pitch rate integrator limit
+
+
+    MC_ROLLRATE_K: 1.0
+    # (0.01 - 5.0, 0.0005) 1.0
+    # Roll rate controller gain
+    
+    MC_ROLLRATE_P: 0.15
+    # (0.01 - 0.6, 0.01) 0.15
+    # Roll rate P gain
+
+    MC_ROLLRATE_I: 0.2
+    # (0.01 - , 0.01) 0.2
+    # Roll rate I gain
+
+    MC_ROLLRATE_D: 0.003
+    # (0.01 - , 0.0005) 0.003
+    # Roll rate D gain
+
+    MC_ROLLRATE_FF: 0.0
+    # (0.0 - ) 0.0
+    # Roll rate feedforwad
+
+    MC_RR_INT_LIM: 0.30
+    # (0.0 - , 0.01) 0.30
+    # Roll rate integrator limit
+
+
+    MC_YAWRATE_K: 1.0
+    # (0.01 - 5.0, 0.0005) 1.0
+    # Yaw rate controller gain
+    
+    MC_YAWRATE_P: 0.2
+    # (0.01 - 0.6, 0.01) 0.2
+    # Yaw rate P gain
+
+    MC_YAWRATE_I: 0.1
+    # (0.01 - , 0.01) 0.1
+    # Yaw rate I gain
+
+    MC_YAWRATE_D: 0.0
+    # (0.01 - , 0.01) 0.0
+    # Yaw rate D gain
+
+    MC_YAWRATE_FF: 0.0
+    # (0.0 - ) 0.0
+    # Yaw rate feedforwad
+
+    MC_YR_INT_LIM: 0.30
+    # (0.0 - , 0.01) 0.30
+    # Yaw rate integrator limit
+
+#TODO: Add vel, pos contoller gains
