@@ -585,22 +585,27 @@ void Px4Drone::doMission(int goalService_, double goalX_, double goalY_, double 
     case 1: // Auto arm (POSCTL) - Takeoff
       if (mEnableAutoTakeoff == true) {
         // set POSCTL Mode
-        if (mSystemStatusVector[static_cast<int>(mState.system_status)] == "STANDBY") {
+        if (!(mState.mode == "POSCTL") && (mState.armed == false) && \
+          (mSystemStatusVector[static_cast<int>(mState.system_status)] == "STANDBY")) {
+          printf("pos loop\n");
           this->setPosctl();
         }
 
         // set Arming
         if (mState.armed == false) {
+          printf("arm loop\n");
           this->setArm();
         }
 
         // go TakeOff
         if ((ackGoTakeoff == false) && (mState.mode == "POSCTL") && (mState.armed == true)) {
+          printf("takeoff loop\n");
           ackGoTakeoff = this->goTakeOff();
         }
 
         // set Auto Takeoff Disable
         if (mState.mode == "AUTO.TAKEOFF") {
+          printf("auto takeoff set loop\n");
           mEnableAutoTakeoff = false;
           ros::param::set("/Px4_Drone/USER/ENABLE_AUTO_TAKEOFF", mEnableAutoTakeoff);
         }
