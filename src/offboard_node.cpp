@@ -10,7 +10,7 @@ int main(int argc, char **argv)
   ros::Rate rate(px4drone.getRosRate());
 
   // do Initialization
-  ROS_ASSERT_CMD(px4drone.doInitialization(rate) == true, \
+  ROS_ASSERT_CMD(px4drone.doInitialization(&nh, &rate) == true, \
     ROS_FATAL_NAMED("offboard_node", "\t[offboard_node] Initialization Fail"); \
     ROS_BREAK());
   ROS_INFO_NAMED("offboard_node", "\t[offboard_node] Initialization Done");

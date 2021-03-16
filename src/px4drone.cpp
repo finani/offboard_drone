@@ -21,7 +21,8 @@ Px4Drone::Px4Drone(ros::NodeHandle *nh_)
     mShowOdom(false),
     mShowGoalAction(false),
     mPubRvizTopics(false),
-    mEnableAutoTakeoff(false)
+    mEnableAutoTakeoff(false),
+    mEnableCustomGain(false)
 {
   mState_sub = nh_->subscribe ("/mavros/state", 10, &Px4Drone::cbState, this);
   mOdom_sub = nh_->subscribe ("/mavros/local_position/odom", 10, &Px4Drone::cbOdom, this);
@@ -41,21 +42,13 @@ Px4Drone::Px4Drone(ros::NodeHandle *nh_)
   nh_->getParam("/Px4_Drone/USER/SHOW_GOAL_ACTION", mShowGoalAction);
   nh_->getParam("/Px4_Drone/USER/PUB_RVIZ_TOPICS", mPubRvizTopics);
   nh_->getParam("/Px4_Drone/USER/ENABLE_AUTO_TAKEOFF", mEnableAutoTakeoff);
+  nh_->getParam("/Px4_Drone/USER/ENABLE_CUSTOM_GAIN", mEnableCustomGain);
   nh_->getParam("/Px4_Drone/MAVROS/REVERSE_THRUST", mReverseThrust);
-  nh_->getParam("/Px4_Drone/Commander/COM_ARM_IMU_ACC", mArmAccErr_mpss);
-  nh_->getParam("/Px4_Drone/Commander/COM_ARM_IMU_GYR", mArmGyroErr_rps);
+
   nh_->getParam("/Px4_Drone/Commander/COM_ARM_MAG_ANG", mArmMagErr_deg);
   nh_->getParam("/Px4_Drone/Commander/COM_RC_OVERRIDE_AUTO", mAutoOverride);
   nh_->getParam("/Px4_Drone/Commander/COM_RC_OVERRIDE_OFFBOARD", mOffboardOverride);
-  nh_->getParam("/Px4_Drone/Mission/MIS_TAKEOFF_ALT", mTakeoffAlt_m);
   nh_->getParam("/Px4_Drone/Geofence/GF_ACTION", mGeofenceAction);
-  nh_->getParam("/Px4_Drone/Geofence/GF_MAX_HOR_DIST", mGeofenceXY_m);
-  nh_->getParam("/Px4_Drone/Geofence/GF_MAX_VER_DIST", mGeofenceZ_m);
-  nh_->getParam("/Px4_Drone/Multicopter_Position_Control/MPC_TKO_SPEED", mTakeoffSpd_mps);
-  nh_->getParam("/Px4_Drone/Multicopter_Position_Control/MPC_LAND_SPEED", mLandSpd_mps);
-  nh_->getParam("/Px4_Drone/Multicopter_Position_Control/MPC_XY_VEL_MAX", mXYMaxSpd_mps);
-  nh_->getParam("/Px4_Drone/Multicopter_Position_Control/MPC_Z_VEL_MAX_UP", mZUpMaxSpd_mps);
-  nh_->getParam("/Px4_Drone/Multicopter_Position_Control/MPC_Z_VEL_MAX_DN", mZDownMaxSpd_mps);
 
   //TODO: check if it is working (reverse_throttle)
   nh_->setParam("/mavros/setpoint_attitude/reverse_thrust", mReverseThrust);
@@ -225,9 +218,9 @@ bool Px4Drone::setParamWithAck(std::string param_id_, int value_) {
     (value_ == paramGet.response.value.integer);
 
   ROS_ASSERT_CMD(ackSetParamWithAck == true, \
-    ROS_FATAL_STREAM_NAMED("px4drone", "[setParamWithAck] setParam " << param_id_ << " Fail"); \
+    ROS_FATAL_STREAM_NAMED("px4drone", "[setParamWithAck] setParam " << param_id_ << " Fail (int)"); \
     ROS_BREAK());
-  ROS_INFO_STREAM_NAMED("px4drone", "[setParamWithAck] setParam " << param_id_ << " Sent");
+  ROS_INFO_STREAM_NAMED("px4drone", "[setParamWithAck] setParam " << param_id_ << " Sent (int)");
 
   return ackSetParamWithAck;
 }
@@ -248,11 +241,18 @@ bool Px4Drone::setParamWithAck(std::string param_id_, float value_) {
     (value_ == paramGet.response.value.real);
 
   ROS_ASSERT_CMD(ackSetParamWithAck == true, \
-    ROS_FATAL_STREAM_NAMED("px4drone", "[setParamWithAck] setParam " << param_id_ << " Fail"); \
+    ROS_FATAL_STREAM_NAMED("px4drone", "[setParamWithAck] setParam " << param_id_ << " Fail (float)"); \
     ROS_BREAK());
-  ROS_INFO_STREAM_NAMED("px4drone", "[setParamWithAck] setParam " << param_id_ << " Sent");
+  ROS_INFO_STREAM_NAMED("px4drone", "[setParamWithAck] setParam " << param_id_ << " Sent (float)");
 
   return ackSetParamWithAck;
+}
+
+bool Px4Drone::setParamFromConfig(std::string param_group_id_, std::string param_id_, ros::NodeHandle *nh_) {
+  float tempValue = 0.0;
+
+  nh_->getParam("/Px4_Drone/" + param_group_id_ + "/" + param_id_, tempValue);
+  return this->setParamWithAck(param_id_, tempValue);
 }
 
 bool Px4Drone::setArm(void) {
@@ -483,7 +483,7 @@ void Px4Drone::goPosition(double xEast_m_, double yNorth_m_, double zUp_m_, doub
   return;
 }
 
-bool Px4Drone::doInitialization(ros::Rate rate_) {
+bool Px4Drone::doInitialization(ros::NodeHandle *nh_, ros::Rate *rate_) {
   ROS_INFO_NAMED("px4drone", "[doInitialization] Initialization start");
 
   bool ackConnected = false;
@@ -494,25 +494,63 @@ bool Px4Drone::doInitialization(ros::Rate rate_) {
     ROS_INFO_NAMED("px4drone", "[doInitialization] FCU Try to Connect Failed");
     ackConnected = mState.connected;
     ros::spinOnce();
-    rate_.sleep();
+    rate_->sleep();
   }
   ROS_INFO_NAMED("px4drone", "[doInitialization] FCU Connected");
 
   // set px4 parameters
-  AckParamSet &= this->setParamWithAck("COM_ARM_IMU_ACC", mArmAccErr_mpss);
-  AckParamSet &= this->setParamWithAck("COM_ARM_IMU_GYR", mArmGyroErr_rps);
-  AckParamSet &= this->setParamWithAck("COM_ARM_MAG_ANG", static_cast<int>(mArmMagErr_deg));
+    AckParamSet &= this->setParamFromConfig("Commander", "COM_ARM_IMU_ACC", nh_);
+    AckParamSet &= this->setParamFromConfig("Commander", "COM_ARM_IMU_GYR", nh_);
+  AckParamSet &= this->setParamWithAck("COM_ARM_MAG_ANG", static_cast<int>(mArmMagErr_deg)); // int
   AckParamSet &= this->setParamWithAck("COM_RC_OVERRIDE", \
-    static_cast<int>((mAutoOverride ? 1:0) | (mOffboardOverride ? 2:0)));
-  AckParamSet &= this->setParamWithAck("GF_ACTION", static_cast<int>(mGeofenceAction));
-  AckParamSet &= this->setParamWithAck("GF_MAX_HOR_DIST", mGeofenceXY_m);
-  AckParamSet &= this->setParamWithAck("GF_MAX_VER_DIST", mGeofenceZ_m);
-  AckParamSet &= this->setParamWithAck("MIS_TAKEOFF_ALT", mTakeoffAlt_m);
-  AckParamSet &= this->setParamWithAck("MPC_TKO_SPEED", mTakeoffSpd_mps);
-  AckParamSet &= this->setParamWithAck("MPC_LAND_SPEED", mLandSpd_mps);
-  AckParamSet &= this->setParamWithAck("MPC_XY_VEL_MAX", mXYMaxSpd_mps);
-  AckParamSet &= this->setParamWithAck("MPC_Z_VEL_MAX_UP", mZUpMaxSpd_mps);
-  AckParamSet &= this->setParamWithAck("MPC_Z_VEL_MAX_DN", mZDownMaxSpd_mps);
+    static_cast<int>((mAutoOverride ? 1:0) | (mOffboardOverride ? 2:0))); // int
+
+  AckParamSet &= this->setParamFromConfig("Land_Detector", "LNDMC_ALT_MAX", nh_);
+  AckParamSet &= this->setParamFromConfig("Mission", "MIS_TAKEOFF_ALT", nh_);
+
+  AckParamSet &= this->setParamWithAck("GF_ACTION", static_cast<int>(mGeofenceAction)); // int
+  AckParamSet &= this->setParamFromConfig("Geofence", "GF_MAX_HOR_DIST", nh_);
+  AckParamSet &= this->setParamFromConfig("Geofence", "GF_MAX_VER_DIST", nh_);
+
+  if (mEnableCustomGain == true) {
+    AckParamSet &= this->setParamFromConfig("Multicopter_Attitude_Control", "MC_PITCHRATE_MAX", nh_);
+    AckParamSet &= this->setParamFromConfig("Multicopter_Attitude_Control", "MC_PITCH_P", nh_);
+    AckParamSet &= this->setParamFromConfig("Multicopter_Attitude_Control", "MC_ROLLRATE_MAX", nh_);
+    AckParamSet &= this->setParamFromConfig("Multicopter_Attitude_Control", "MC_ROLL_P", nh_);
+    AckParamSet &= this->setParamFromConfig("Multicopter_Attitude_Control", "MC_YAWRATE_MAX", nh_);
+    AckParamSet &= this->setParamFromConfig("Multicopter_Attitude_Control", "MC_YAW_P", nh_);
+    AckParamSet &= this->setParamFromConfig("Multicopter_Attitude_Control", "MC_YAW_WEIGHT", nh_);
+  }
+
+  AckParamSet &= this->setParamFromConfig("Multicopter_Position_Control", "MPC_TKO_SPEED", nh_);
+  AckParamSet &= this->setParamFromConfig("Multicopter_Position_Control", "MPC_LAND_SPEED", nh_);
+  AckParamSet &= this->setParamFromConfig("Multicopter_Position_Control", "MPC_XY_VEL_MAX", nh_);
+  AckParamSet &= this->setParamFromConfig("Multicopter_Position_Control", "MPC_Z_VEL_MAX_UP", nh_);
+  AckParamSet &= this->setParamFromConfig("Multicopter_Position_Control", "MPC_Z_VEL_MAX_DN", nh_);
+
+  if (mEnableCustomGain == true) {
+    AckParamSet &= this->setParamFromConfig("Multicopter_Rate_Control", "MC_PITCHRATE_K", nh_);
+    AckParamSet &= this->setParamFromConfig("Multicopter_Rate_Control", "MC_PITCHRATE_P", nh_);
+    AckParamSet &= this->setParamFromConfig("Multicopter_Rate_Control", "MC_PITCHRATE_I", nh_);
+    AckParamSet &= this->setParamFromConfig("Multicopter_Rate_Control", "MC_PITCHRATE_D", nh_);
+    AckParamSet &= this->setParamFromConfig("Multicopter_Rate_Control", "MC_PITCHRATE_FF", nh_);
+    AckParamSet &= this->setParamFromConfig("Multicopter_Rate_Control", "MC_PR_INT_LIM", nh_);
+
+    AckParamSet &= this->setParamFromConfig("Multicopter_Rate_Control", "MC_ROLLRATE_K", nh_);
+    AckParamSet &= this->setParamFromConfig("Multicopter_Rate_Control", "MC_ROLLRATE_P", nh_);
+    AckParamSet &= this->setParamFromConfig("Multicopter_Rate_Control", "MC_ROLLRATE_I", nh_);
+    AckParamSet &= this->setParamFromConfig("Multicopter_Rate_Control", "MC_ROLLRATE_D", nh_);
+    AckParamSet &= this->setParamFromConfig("Multicopter_Rate_Control", "MC_ROLLRATE_FF", nh_);
+    AckParamSet &= this->setParamFromConfig("Multicopter_Rate_Control", "MC_RR_INT_LIM", nh_);
+
+    AckParamSet &= this->setParamFromConfig("Multicopter_Rate_Control", "MC_YAWRATE_K", nh_);
+    AckParamSet &= this->setParamFromConfig("Multicopter_Rate_Control", "MC_YAWRATE_P", nh_);
+    AckParamSet &= this->setParamFromConfig("Multicopter_Rate_Control", "MC_YAWRATE_I", nh_);
+    AckParamSet &= this->setParamFromConfig("Multicopter_Rate_Control", "MC_YAWRATE_D", nh_);
+    AckParamSet &= this->setParamFromConfig("Multicopter_Rate_Control", "MC_YAWRATE_FF", nh_);
+    AckParamSet &= this->setParamFromConfig("Multicopter_Rate_Control", "MC_YR_INT_LIM", nh_);
+  }
+
 
   ROS_ASSERT_CMD(AckParamSet == true, \
     ROS_FATAL_NAMED("px4drone", "[doInitialization] Px4 Params Set Failed"); \
@@ -541,6 +579,7 @@ void Px4Drone::doMission(int goalService_, double goalX_, double goalY_, double 
       // reset Auto Takeoff
       mEnableAutoTakeoff = true;
       ros::param::set("/Px4_Drone/USER/ENABLE_AUTO_TAKEOFF", mEnableAutoTakeoff);
+      ROS_INFO_THROTTLE_NAMED(10.0, "px4drone", "[doMission] Auto Takeoff reset");
       break;
 
     case 1: // Auto arm (POSCTL) - Takeoff

@@ -46,6 +46,7 @@ class Px4Drone {
 
   bool setParamWithAck(std::string param_id_, int value_);
   bool setParamWithAck(std::string param_id_, float value_);
+  bool setParamFromConfig(std::string param_group_id_, std::string param_id_, ros::NodeHandle *nh_);
   bool setArm(void);
   bool setDisarm(void);
   bool setAcro(void);
@@ -66,7 +67,7 @@ class Px4Drone {
   void goVelocityBody(double xForward_mps_, double yLeft_mps_, double zUp_mps_, double headingCCW_dps_);
   void goPosition(double xEast_m_, double yNorth_m_, double zUp_m_, double headingCCW_deg_);
 
-  bool doInitialization(ros::Rate rate_);
+  bool doInitialization(ros::NodeHandle *nh_, ros::Rate *rate_);
   void doMission(int goalService_, double goalX_, double goalY_, double goalZ_, double goalR_);
 
   void pubRvizTopics(void) const;
@@ -111,20 +112,11 @@ class Px4Drone {
   bool mShowGoalAction;
   bool mPubRvizTopics;
   bool mEnableAutoTakeoff;
+  bool mEnableCustomGain;
 
   bool mReverseThrust;
-  float mArmAccErr_mpss;
-  float mArmGyroErr_rps;
   int mArmMagErr_deg;
   bool mAutoOverride;
   bool mOffboardOverride;
   int mGeofenceAction;
-  float mGeofenceXY_m;
-  float mGeofenceZ_m;
-  float mTakeoffAlt_m;
-  float mTakeoffSpd_mps;
-  float mLandSpd_mps;
-  float mXYMaxSpd_mps;
-  float mZUpMaxSpd_mps;
-  float mZDownMaxSpd_mps;
 };

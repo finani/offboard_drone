@@ -28,7 +28,6 @@ Px4_Drone:
     # (False - True) False
     # Enable Auto Takeoff. It will set false after auto takeoff
 
-  #TODO: add this function
     ENABLE_CUSTOM_GAIN: False
     # (False - True) False
     # Enable gain parameters from this yaml file.
@@ -123,7 +122,7 @@ Px4_Drone:
 
 
   Multicopter_Position_Control:
-    MPC_TKO_SPEED:    1.0
+    MPC_TKO_SPEED:    1.5
     # (1.0 - 5.0)     1.5  [mps]
     # Takeoff climb rate
 
@@ -139,7 +138,7 @@ Px4_Drone:
     # (0.5 - 8.0)     3.0  [mps]
     # Maximum vertical ascent velocity
 
-    MPC_Z_VEL_MAX_DN: 1.0
+    MPC_Z_VEL_MAX_DN: 2.0
     # (0.5 - 4.0)     1.0  [mps]
     # Maximum vertical descent velocity
 
