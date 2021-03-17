@@ -27,6 +27,8 @@ Px4Drone::Px4Drone(ros::NodeHandle *nh_)
   mState_sub = nh_->subscribe ("/mavros/state", 10, &Px4Drone::cbState, this);
   mOdom_sub = nh_->subscribe ("/mavros/local_position/odom", 10, &Px4Drone::cbOdom, this);
   mGoalAction_sub = nh_->subscribe ("/GoalAction", 10, &Px4Drone::cbGoalAction, this);
+  mCmdRate_pub = nh_->advertise <mavros_msgs::AttitudeTarget> ("/mavros/setpoint_raw/attitude", 10);
+  mCmdAtt_pub = nh_->advertise <mavros_msgs::AttitudeTarget> ("/mavros/setpoint_raw/attitude", 10);
   mCmdVel_pub = nh_->advertise <geometry_msgs::TwistStamped> ("/mavros/setpoint_velocity/cmd_vel", 10);
   mCmdPos_pub = nh_->advertise <geometry_msgs::PoseStamped> ("/mavros/setpoint_position/local", 10);
   mUavPath_pub = nh_->advertise <nav_msgs::Path> ("/uav_path", 10);
@@ -442,11 +444,24 @@ void Px4Drone::goAccel(double xForward_mpss_, double y_Left_mpss_, double z_Up_m
   return;
 }
 
-void Px4Drone::goAngularVelocity(void) {
+void Px4Drone::goAngularVelocity(double xForward_RollRight_dps_, double yLeft_PitchForward_dps_, double zUp_YawCCW_dps_, double zUpThrust_percent_) {
+  mavros_msgs::AttitudeTarget targetAngularVelocity;
+  targetAngularVelocity.type_mask = targetAngularVelocity.IGNORE_ATTITUDE;
+  targetAngularVelocity.body_rate.x = xForward_RollRight_dps_*const_D2R();
+  targetAngularVelocity.body_rate.y = yLeft_PitchForward_dps_*const_D2R();
+  targetAngularVelocity.body_rate.z = zUp_YawCCW_dps_*const_D2R();
+  targetAngularVelocity.thrust = zUpThrust_percent_; // [0.7062] Hovering
+  mCmdRate_pub.publish(targetAngularVelocity);
   return;
 }
 
-void Px4Drone::goAttitude(void) {
+void Px4Drone::goAttitude(double xPitchForward_deg_, double yRollRight_deg_, double zYawCCW_deg_, double zUpThrust_percent_) {
+  mavros_msgs::AttitudeTarget targetAttitude;
+  targetAttitude.type_mask = targetAttitude.IGNORE_ROLL_RATE + targetAttitude.IGNORE_PITCH_RATE + targetAttitude.IGNORE_YAW_RATE;
+  quaternionTFToMsg(tf::Quaternion(xPitchForward_deg_*const_D2R(), yRollRight_deg_*const_D2R(), zYawCCW_deg_*const_D2R()), \
+    targetAttitude.orientation); // Y, X, Z axis rotate based on ENU (YXZ -> LFU -> pitchForward, rollRight, yawCCW)
+  targetAttitude.thrust = zUpThrust_percent_; // [0.7062] Hovering
+  mCmdAtt_pub.publish(targetAttitude);
   return;
 }
 
@@ -587,28 +602,27 @@ void Px4Drone::doMission(int goalService_, double goalX_, double goalY_, double 
         // set POSCTL Mode
         if (!(mState.mode == "POSCTL") && (mState.armed == false) && \
           (mSystemStatusVector[static_cast<int>(mState.system_status)] == "STANDBY")) {
-          printf("pos loop\n");
           this->setPosctl();
         }
 
         // set Arming
         if (mState.armed == false) {
-          printf("arm loop\n");
           this->setArm();
         }
 
         // go TakeOff
         if ((ackGoTakeoff == false) && (mState.mode == "POSCTL") && (mState.armed == true)) {
-          printf("takeoff loop\n");
           ackGoTakeoff = this->goTakeOff();
         }
 
         // set Auto Takeoff Disable
         if (mState.mode == "AUTO.TAKEOFF") {
-          printf("auto takeoff set loop\n");
           mEnableAutoTakeoff = false;
           ros::param::set("/Px4_Drone/USER/ENABLE_AUTO_TAKEOFF", mEnableAutoTakeoff);
         }
+      }
+      else {
+          ROS_INFO_THROTTLE_NAMED(10.0, "px4drone", "[doMission] Require Takeoff reset");
       }
       break;
 
@@ -642,8 +656,8 @@ void Px4Drone::doMission(int goalService_, double goalX_, double goalY_, double 
       break;
 
     case 13: // Angular velocity control
-      // go AngularVelocity
-//      this->goAngularVelocity(goalX_, goalY_, goalZ_, goalR_, goalT_);
+      // xForward_RollRight_dps_, yLeft_PitchForward_dps_, zUp_YawCCW_dps_, zUpThrust_percent_
+      this->goAngularVelocity(goalX_, goalY_, goalZ_, goalR_);
       // set OFFBOARD Mode
       if (!(mState.mode == "OFFBOARD") && \
         (mSystemStatusVector[static_cast<int>(mState.system_status)] == "ACTIVE")) {
@@ -652,8 +666,8 @@ void Px4Drone::doMission(int goalService_, double goalX_, double goalY_, double 
       break;
 
     case 14: // Attitude control
-      // go Attitude
-//      this->goAngularVelocity(goalX_, goalY_, goalZ_, goalW_, goalT_);
+      // xPitchForward_deg_, yRollRight_deg_, zYawCCW_deg_, zUpThrust_percent_
+      this->goAttitude(goalX_, goalY_, goalZ_, goalR_);
       // set OFFBOARD Mode
       if (!(mState.mode == "OFFBOARD") && \
         (mSystemStatusVector[static_cast<int>(mState.system_status)] == "ACTIVE")) {
@@ -662,7 +676,7 @@ void Px4Drone::doMission(int goalService_, double goalX_, double goalY_, double 
       break;
 
     case 21: // Velocity control
-      // x_east_mps, y_north_mps, z_up_mps, heading_CCW_dps
+      // xEast_mps_, yNorth_mps_, zUp_mps_, headingCCW_dps_
       this->goVelocity(goalX_, goalY_, goalZ_, goalR_);
       // set OFFBOARD Mode
       if (!(mState.mode == "OFFBOARD") && \
@@ -672,7 +686,7 @@ void Px4Drone::doMission(int goalService_, double goalX_, double goalY_, double 
       break;
 
     case 22: // Velocity Body control
-      // x_forward_mps, y_left_mps, z_up_mps, heading_CCW_dps
+      // xForward_mps_, yLeft_mps_, zUp_mps_, headingCCW_dps_
       this->goVelocityBody(goalX_, goalY_, goalZ_, goalR_);
       // set OFFBOARD Mode
       if (!(mState.mode == "OFFBOARD") && \
@@ -682,7 +696,7 @@ void Px4Drone::doMission(int goalService_, double goalX_, double goalY_, double 
       break;
 
     case 23: // Position control
-      // x_east_m, y_north_m, z_up_m, heading_CCW_deg
+      // xEast_m_, yNorth_m_, zUp_m_, headingCCW_deg_
       this->goPosition(goalX_, goalY_, goalZ_, goalR_);
       // set OFFBOARD Mode
       if (!(mState.mode == "OFFBOARD") && \

@@ -12,6 +12,7 @@
 #include <mavros_msgs/SetMode.h>
 #include <mavros_msgs/ParamSet.h>
 #include <mavros_msgs/ParamGet.h>
+#include <mavros_msgs/AttitudeTarget.h>
 #include <nav_msgs/Odometry.h>
 #include <nav_msgs/Path.h>
 #include <geometry_msgs/PoseStamped.h>
@@ -61,8 +62,8 @@ class Px4Drone {
   bool goHold(void);
   void goForce(double xForward_N_, double y_Left_N_, double z_Up_N_);
   void goAccel(double xForward_mpss_, double y_Left_mpss_, double z_Up_mpss_);
-  void goAngularVelocity(void);
-  void goAttitude(void);
+  void goAngularVelocity(double xForward_RollRight_dps_, double yLeft_PitchForward_dps_, double zUp_YawCCW_dps_, double zUpThrust_percent_);
+  void goAttitude(double xPitchForward_deg_, double yRollRight_deg_, double zYawCCW_deg_, double zUpThrust_percent_);
   void goVelocity(double xEast_mps_, double yNorth_mps_, double zUp_mps_, double headingCCW_dps_);
   void goVelocityBody(double xForward_mps_, double yLeft_mps_, double zUp_mps_, double headingCCW_dps_);
   void goPosition(double xEast_m_, double yNorth_m_, double zUp_m_, double headingCCW_deg_);
@@ -76,6 +77,8 @@ class Px4Drone {
   ros::Subscriber mState_sub;
   ros::Subscriber mOdom_sub;
   ros::Subscriber mGoalAction_sub;
+  ros::Publisher mCmdRate_pub;
+  ros::Publisher mCmdAtt_pub;
   ros::Publisher mCmdVel_pub;
   ros::Publisher mCmdPos_pub;
   ros::Publisher mUavPath_pub;
