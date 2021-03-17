@@ -50,19 +50,31 @@ include_directories(
 link_directories(${OpenCV_LIBRARY_DIRS})
 
 add_executable(
-	offboard_node_uav21
-	src/offboard_node_uav21.cpp)
-add_executable(
-	offboard_node_uav21_gazebo
-	src/offboard_node_uav21_gazebo.cpp)
+	offboard_node
+	src/offboard_node.cpp)
 
 target_link_libraries(
-	offboard_node_uav21
+	offboard_node
 	${catkin_LIBRARIES}
     ${OpenCV_LIBS}  
 )
+
+add_executable(
+	monitor_offboard
+	src/monitor_offboard.cpp)
+
 target_link_libraries(
-	offboard_node_uav21_gazebo
+	monitor_offboard
+	${catkin_LIBRARIES}
+    ${OpenCV_LIBS}  
+)
+
+add_executable(
+	velocity_cmd_test_node
+	src/velocity_cmd_test_node.cpp)
+
+target_link_libraries(
+	velocity_cmd_test_node
 	${catkin_LIBRARIES}
     ${OpenCV_LIBS}  
 )

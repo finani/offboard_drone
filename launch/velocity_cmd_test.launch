@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<launch>
+    <node name="velocity_cmd_test_node" type="velocity_cmd_test_node" output="screen" pkg="offboard_drone">
+    </node>
+</launch>
