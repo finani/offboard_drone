@@ -600,8 +600,9 @@ void Px4Drone::doMission(int goalService_, double goalX_, double goalY_, double 
     case 1: // Auto arm (POSCTL) - Takeoff
       if (mEnableAutoTakeoff == true) {
         // set POSCTL Mode
-        if (!(mState.mode == "POSCTL") && (mState.armed == false) && \
-          (mSystemStatusVector[static_cast<int>(mState.system_status)] == "STANDBY")) {
+        // if (!(mState.mode == "POSCTL") && (mState.armed == false) && \
+        //   (mSystemStatusVector[static_cast<int>(mState.system_status)] == "STANDBY")) {
+        if (!(mState.mode == "POSCTL") && (mState.armed == false) {
           this->setPosctl();
         }
 
@@ -628,8 +629,9 @@ void Px4Drone::doMission(int goalService_, double goalX_, double goalY_, double 
 
     case 2: // Auto landing (Disarm)
       // go Landing
-      if ((ackGoLanding == false) && \
-          (mSystemStatusVector[static_cast<int>(mState.system_status)] == "ACTIVE")) {
+      // if ((ackGoLanding == false) && \
+      //     (mSystemStatusVector[static_cast<int>(mState.system_status)] == "ACTIVE")) {
+      if (ackGoLanding == false) {
         ackGoLanding = this->goLanding();
       }
       // Auto disarming 2 seconds after landing
@@ -639,8 +641,9 @@ void Px4Drone::doMission(int goalService_, double goalX_, double goalY_, double 
       // go Force
       this->goForce(goalX_, goalY_, goalZ_); // , goalR_
       // set OFFBOARD Mode
-      if (!(mState.mode == "OFFBOARD") && \
-        (mSystemStatusVector[static_cast<int>(mState.system_status)] == "ACTIVE")) {
+      // if (!(mState.mode == "OFFBOARD") && \
+      //   (mSystemStatusVector[static_cast<int>(mState.system_status)] == "ACTIVE")) {
+      if (!(mState.mode == "OFFBOARD")) {
         this->setOffboard();
       }
       break;
@@ -649,8 +652,9 @@ void Px4Drone::doMission(int goalService_, double goalX_, double goalY_, double 
       // go Accel
       this->goAccel(goalX_, goalY_, goalZ_); // , goalR_
       // set OFFBOARD Mode
-      if (!(mState.mode == "OFFBOARD") && \
-        (mSystemStatusVector[static_cast<int>(mState.system_status)] == "ACTIVE")) {
+      // if (!(mState.mode == "OFFBOARD") && \
+      //   (mSystemStatusVector[static_cast<int>(mState.system_status)] == "ACTIVE")) {
+      if (!(mState.mode == "OFFBOARD")) {
         this->setOffboard();
       }
       break;
@@ -659,8 +663,9 @@ void Px4Drone::doMission(int goalService_, double goalX_, double goalY_, double 
       // xForward_RollRight_dps_, yLeft_PitchForward_dps_, zUp_YawCCW_dps_, zUpThrust_percent_
       this->goAngularVelocity(goalX_, goalY_, goalZ_, goalR_);
       // set OFFBOARD Mode
-      if (!(mState.mode == "OFFBOARD") && \
-        (mSystemStatusVector[static_cast<int>(mState.system_status)] == "ACTIVE")) {
+      // if (!(mState.mode == "OFFBOARD") && \
+      //   (mSystemStatusVector[static_cast<int>(mState.system_status)] == "ACTIVE")) {
+      if (!(mState.mode == "OFFBOARD")) {
         this->setOffboard();
       }
       break;
@@ -669,8 +674,9 @@ void Px4Drone::doMission(int goalService_, double goalX_, double goalY_, double 
       // xPitchForward_deg_, yRollRight_deg_, zYawCCW_deg_, zUpThrust_percent_
       this->goAttitude(goalX_, goalY_, goalZ_, goalR_);
       // set OFFBOARD Mode
-      if (!(mState.mode == "OFFBOARD") && \
-        (mSystemStatusVector[static_cast<int>(mState.system_status)] == "ACTIVE")) {
+      // if (!(mState.mode == "OFFBOARD") && \
+      //   (mSystemStatusVector[static_cast<int>(mState.system_status)] == "ACTIVE")) {
+      if (!(mState.mode == "OFFBOARD")) {
         this->setOffboard();
       }
       break;
@@ -679,8 +685,9 @@ void Px4Drone::doMission(int goalService_, double goalX_, double goalY_, double 
       // xEast_mps_, yNorth_mps_, zUp_mps_, headingCCW_dps_
       this->goVelocity(goalX_, goalY_, goalZ_, goalR_);
       // set OFFBOARD Mode
-      if (!(mState.mode == "OFFBOARD") && \
-        (mSystemStatusVector[static_cast<int>(mState.system_status)] == "ACTIVE")) {
+      // if (!(mState.mode == "OFFBOARD") && \
+      //   (mSystemStatusVector[static_cast<int>(mState.system_status)] == "ACTIVE")) {
+      if (!(mState.mode == "OFFBOARD")) {
         this->setOffboard();
       }
       break;
@@ -689,8 +696,9 @@ void Px4Drone::doMission(int goalService_, double goalX_, double goalY_, double 
       // xForward_mps_, yLeft_mps_, zUp_mps_, headingCCW_dps_
       this->goVelocityBody(goalX_, goalY_, goalZ_, goalR_);
       // set OFFBOARD Mode
-      if (!(mState.mode == "OFFBOARD") && \
-        (mSystemStatusVector[static_cast<int>(mState.system_status)] == "ACTIVE")) {
+      // if (!(mState.mode == "OFFBOARD") && \
+      //   (mSystemStatusVector[static_cast<int>(mState.system_status)] == "ACTIVE")) {
+      if (!(mState.mode == "OFFBOARD")) {
         this->setOffboard();
       }
       break;
@@ -699,8 +707,9 @@ void Px4Drone::doMission(int goalService_, double goalX_, double goalY_, double 
       // xEast_m_, yNorth_m_, zUp_m_, headingCCW_deg_
       this->goPosition(goalX_, goalY_, goalZ_, goalR_);
       // set OFFBOARD Mode
-      if (!(mState.mode == "OFFBOARD") && \
-        (mSystemStatusVector[static_cast<int>(mState.system_status)] == "ACTIVE")) {
+      // if (!(mState.mode == "OFFBOARD") && \
+      //   (mSystemStatusVector[static_cast<int>(mState.system_status)] == "ACTIVE")) {
+      if (!(mState.mode == "OFFBOARD")) {
         this->setOffboard();
       }
       break;
