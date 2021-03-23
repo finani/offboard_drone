@@ -32,9 +32,11 @@ class Px4Drone {
   void cbOdom(const nav_msgs::Odometry::ConstPtr& msg_);
   void cbGoalAction(const std_msgs::Float32MultiArray::ConstPtr& msg_);
 
-  void showState(void) const;
-  void showOdom(void) const;
-  void showGoalAction(void) const;
+  void showGuide(const ros::TimerEvent& event_) const;
+  void showState(const ros::TimerEvent& event_) const;
+  void showOdom(const ros::TimerEvent& event_) const;
+  void showGoalAction(const ros::TimerEvent& event_) const;
+  void pubRvizTopics(const ros::TimerEvent& event_) const;
 
   mavros_msgs::State getState(void) const;
   nav_msgs::Odometry getOdom() const;
@@ -71,7 +73,7 @@ class Px4Drone {
   bool doInitialization(ros::NodeHandle *nh_, ros::Rate *rate_);
   void doMission(int goalService_, double goalX_, double goalY_, double goalZ_, double goalR_);
 
-  void pubRvizTopics(void) const;
+  void run(void);
 
  private:
   ros::Subscriber mState_sub;
@@ -87,6 +89,11 @@ class Px4Drone {
   ros::ServiceClient mSetMode_client;
   ros::ServiceClient mParamSet_client;
   ros::ServiceClient mParamGet_client;
+  ros::Timer mShowGuide_timer;
+  ros::Timer mShowState_timer;
+  ros::Timer mShowOdom_timer;
+  ros::Timer mShowGoalAction_timer;
+  ros::Timer mPubRvizTopics_timer;
 
   mavros_msgs::State mState;
   nav_msgs::Odometry mOdom;
@@ -110,10 +117,11 @@ class Px4Drone {
   double mGoalZ;
   double mGoalR;
   float mRosRate;
-  bool mShowState;
-  bool mShowOdom;
-  bool mShowGoalAction;
-  bool mPubRvizTopics;
+  bool mShowGuide;
+  float mShowState;
+  float mShowOdom;
+  float mShowGoalAction;
+  float mPubRvizTopics;
   bool mEnableAutoTakeoff;
   bool mEnableCustomGain;
 

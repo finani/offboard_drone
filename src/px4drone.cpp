@@ -17,28 +17,32 @@ Px4Drone::Px4Drone(ros::NodeHandle *nh_)
     mGoalZ(0),
     mGoalR(0),
     mRosRate(20.0),
-    mShowState(false),
-    mShowOdom(false),
-    mShowGoalAction(false),
-    mPubRvizTopics(false),
+    mShowGuide(true),
+    mShowState(1.0),
+    mShowOdom(1.0),
+    mShowGoalAction(1.0),
+    mPubRvizTopics(20.0),
     mEnableAutoTakeoff(false),
     mEnableCustomGain(false)
 {
   mState_sub = nh_->subscribe ("/mavros/state", 10, &Px4Drone::cbState, this);
   mOdom_sub = nh_->subscribe ("/mavros/local_position/odom", 10, &Px4Drone::cbOdom, this);
   mGoalAction_sub = nh_->subscribe ("/GoalAction", 10, &Px4Drone::cbGoalAction, this);
+
   mCmdRate_pub = nh_->advertise <mavros_msgs::AttitudeTarget> ("/mavros/setpoint_raw/attitude", 10);
   mCmdAtt_pub = nh_->advertise <mavros_msgs::AttitudeTarget> ("/mavros/setpoint_raw/attitude", 10);
   mCmdVel_pub = nh_->advertise <geometry_msgs::TwistStamped> ("/mavros/setpoint_velocity/cmd_vel", 10);
   mCmdPos_pub = nh_->advertise <geometry_msgs::PoseStamped> ("/mavros/setpoint_position/local", 10);
   mUavPath_pub = nh_->advertise <nav_msgs::Path> ("/uav_path", 10);
   mUavPos_pub = nh_->advertise <visualization_msgs::Marker> ("/uav_pos", 10);
+
   mArming_client = nh_->serviceClient <mavros_msgs::CommandBool> ("/mavros/cmd/arming");
   mSetMode_client = nh_->serviceClient <mavros_msgs::SetMode> ("/mavros/set_mode");
   mParamSet_client = nh_->serviceClient <mavros_msgs::ParamSet> ("/mavros/param/set");
   mParamGet_client = nh_->serviceClient <mavros_msgs::ParamGet> ("/mavros/param/get");
 
   nh_->getParam("/Px4_Drone/ROS/ROS_RATE", mRosRate);
+  nh_->getParam("/Px4_Drone/USER/SHOW_GUIDE", mShowGuide);
   nh_->getParam("/Px4_Drone/USER/SHOW_STATE", mShowState);
   nh_->getParam("/Px4_Drone/USER/SHOW_ODOM", mShowOdom);
   nh_->getParam("/Px4_Drone/USER/SHOW_GOAL_ACTION", mShowGoalAction);
@@ -46,6 +50,12 @@ Px4Drone::Px4Drone(ros::NodeHandle *nh_)
   nh_->getParam("/Px4_Drone/USER/ENABLE_AUTO_TAKEOFF", mEnableAutoTakeoff);
   nh_->getParam("/Px4_Drone/USER/ENABLE_CUSTOM_GAIN", mEnableCustomGain);
   nh_->getParam("/Px4_Drone/MAVROS/REVERSE_THRUST", mReverseThrust);
+
+  if (mShowGuide == true)         mShowGuide_timer = nh_->createTimer(ros::Duration(1.0), &Px4Drone::showGuide, this, true);
+  if (!(mShowState == 0.0))       mShowState_timer = nh_->createTimer(ros::Duration(1.0/mShowState), &Px4Drone::showState, this);
+  if (!(mShowOdom == 0.0))        mShowOdom_timer = nh_->createTimer(ros::Duration(1.0/mShowOdom), &Px4Drone::showOdom, this);
+  if (!(mShowGoalAction == 0.0))  mShowGoalAction_timer = nh_->createTimer(ros::Duration(1.0/mShowGoalAction), &Px4Drone::showGoalAction, this);
+  if (!(mPubRvizTopics == 0.0))   mPubRvizTopics_timer = nh_->createTimer(ros::Duration(1.0/mPubRvizTopics), &Px4Drone::pubRvizTopics, this);
 
   nh_->getParam("/Px4_Drone/Commander/COM_ARM_MAG_ANG", mArmMagErr_deg);
   nh_->getParam("/Px4_Drone/Commander/COM_RC_OVERRIDE_AUTO", mAutoOverride);
@@ -111,64 +121,100 @@ void Px4Drone::cbGoalAction(const std_msgs::Float32MultiArray::ConstPtr& msg_) {
   return;
 }
 
-void Px4Drone::showState(void) const {
-  if (mShowState == true) {
-    ROS_INFO_ONCE_NAMED("px4drone", "[showState] showState Turn On");
+void Px4Drone::showGuide(const ros::TimerEvent& event_) const {
+  ROS_INFO_ONCE_NAMED("px4drone", "[showGuide] showGuide Turn On");
 
-    std::cout << std::endl;
-    std::cout << "\t[Px4Drone] State\t(/mavros/state)" << std::endl;
-    std::cout << "m_state.connected     = " << (mState.connected ? "OK!" : "Not yet!") << std::endl;
-    std::cout << "m_state.armed         = " << (mState.armed ? "OK!" : "Not yet!") << std::endl;
-    std::cout << "m_state.guided        = " << (mState.guided ? "OK!" : "Not yet!") << std::endl;
-    std::cout << "m_state.manual_input  = " << (mState.manual_input ? "OK!" : "Not yet!") << std::endl;
-    std::cout << "m_state.mode          = " << mState.mode << std::endl;
-    std::cout << "m_state.system_status = " << "MAV_STATE_" << mSystemStatusVector[static_cast<int>(mState.system_status)] << std::endl;
-    std::cout << std::endl;
-  }
-  else {
-    ROS_INFO_ONCE_NAMED("px4drone", "[showState] showState Turn Off");
-  }
+  std::cout << std::endl;
+  std::cout << std::endl;
+  std::cout << std::endl;
+  std::cout << "\t[Px4Drone] User Guide" << std::endl;
+  std::cout << std::endl;
+  std::cout << "Goal Action:" << std::endl;
+  std::cout << "\t[0] Reset auto takeoff" << std::endl;
+  std::cout << "\t[1] Auto takeoff" << std::endl;
+  std::cout << "\t[2] Auto landing" << std::endl;
+  std::cout << std::endl;
+  std::cout << "\t[11] Force control (not supported for now)" << std::endl;
+  std::cout << "\t[12] Acceleration control (not supported for now)" << std::endl;
+  std::cout << "\t[13] Angular Velocity control [rollRight, pitchForward, yawCCW, thrustUp]" << std::endl;
+  std::cout << "\t[14] Attitude control [pitchForward, rollRight, yawCCW, thrustUp]" << std::endl;
+  std::cout << std::endl;
+  std::cout << "\t[21] Velocity control [vxEast, vyNorth, vzUp, yawCCW]" << std::endl;
+  std::cout << "\t[22] Velocity Body control [vxForward, vyLeft, vzUp, yawRateCCW]" << std::endl;
+  std::cout << "\t[23] Position control [xEast, yNorth, zUp, yawCCW]" << std::endl;
+  std::cout << std::endl;
+  std::cout << std::endl;
+  std::cout << std::endl;
   return;
 }
 
-void Px4Drone::showOdom(void) const {
-  if (mShowOdom == true) {
-    ROS_INFO_ONCE_NAMED("px4drone", "[showOdom] showOdom Turn On");
+void Px4Drone::showState(const ros::TimerEvent& event_) const {
+  ROS_INFO_ONCE_NAMED("px4drone", "[showState] showState Turn On");
 
-    std::cout << std::endl;
-    std::cout << "\t[Px4Drone] Odometry\t(/mavros/local_position/odom)" << std::endl;
-    std::cout << "m_odom.position_m [x,y,z]      = [" << mCurPos_m.getX() << \
-      ", \t" << mCurPos_m.getY() << ", \t" << mCurPos_m.getZ() << "]" << std::endl;
-    std::cout << "m_odom.velocity_mps [x,y,z]    = [" << mCurVel_mps.getX() << \
-      ", \t" << mCurVel_mps.getY() << ", \t" << mCurVel_mps.getZ() << "]" << std::endl;
-    std::cout << "m_odom.orientation_q [x,y,z,w] = [" << mCurQ.getX() << \
-      ", \t" << mCurQ.getY() << ", \t" << mCurQ.getZ() << ", \t" << mCurQ.getW() << "]" << std::endl;
-    std::cout << "m_odom.rpy_deg [r,p,y]         = [" << mCurRpy_deg.getX() << \
-      ", \t" << mCurRpy_deg.getY() << ", \t" << mCurRpy_deg.getZ() << "]" << std::endl;
-    std::cout << "m_odom.rpy_rate_dps [r,p,y]    = [" << mCurRpyRate_rps.getX() *const_R2D() << \
-      ", \t" << mCurRpyRate_rps.getY() *const_R2D() << ", \t" << mCurRpyRate_rps.getZ() *const_R2D() << "]" << std::endl;
-    std::cout << std::endl;
-  }
-  else {
-    ROS_INFO_ONCE_NAMED("px4drone", "[showOdom] showOdom Turn Off");
-  }
+  std::cout << std::endl;
+  std::cout << "\t[Px4Drone] State\t(/mavros/state)" << std::endl;
+  std::cout << "m_state.connected     = " << (mState.connected ? "OK!" : "Not yet!") << std::endl;
+  std::cout << "m_state.armed         = " << (mState.armed ? "OK!" : "Not yet!") << std::endl;
+  std::cout << "m_state.guided        = " << (mState.guided ? "OK!" : "Not yet!") << std::endl;
+  std::cout << "m_state.manual_input  = " << (mState.manual_input ? "OK!" : "Not yet!") << std::endl;
+  std::cout << "m_state.mode          = " << mState.mode << std::endl;
+  std::cout << "m_state.system_status = " << "MAV_STATE_" << mSystemStatusVector[static_cast<int>(mState.system_status)] << std::endl;
+  std::cout << std::endl;
   return;
 }
 
-void Px4Drone::showGoalAction(void) const {
-  if (mShowGoalAction == true) {
-    ROS_INFO_ONCE_NAMED("px4drone", "[showGoalAction] showGoalAction Turn On");
+void Px4Drone::showOdom(const ros::TimerEvent& event_) const {
+  ROS_INFO_ONCE_NAMED("px4drone", "[showOdom] showOdom Turn On");
 
-    std::cout << std::endl;
-    std::cout << "\t[Px4Drone] GoalAction\t(/GoalAction)" << std::endl;
-    std::cout << "goal_service   = [" << mGoalService << std::endl;
-    std::cout << "goal [x,y,z,r] = [" << mGoalX << ", \t" << mGoalY << ", \t" << \
-      mGoalZ << ", \t" << mGoalR << "]" << std::endl;
-    std::cout << std::endl;
-  }
-  else {
-    ROS_INFO_ONCE_NAMED("px4drone", "[showGoalAction] showGoalAction Turn Off");
-  }
+  std::cout << std::endl;
+  std::cout << "\t[Px4Drone] Odometry\t(/mavros/local_position/odom)" << std::endl;
+  std::cout << "m_odom.position_m [x,y,z]      = [" << mCurPos_m.getX() << \
+    ", \t" << mCurPos_m.getY() << ", \t" << mCurPos_m.getZ() << "]" << std::endl;
+  std::cout << "m_odom.velocity_mps [x,y,z]    = [" << mCurVel_mps.getX() << \
+    ", \t" << mCurVel_mps.getY() << ", \t" << mCurVel_mps.getZ() << "]" << std::endl;
+  std::cout << "m_odom.orientation_q [x,y,z,w] = [" << mCurQ.getX() << \
+    ", \t" << mCurQ.getY() << ", \t" << mCurQ.getZ() << ", \t" << mCurQ.getW() << "]" << std::endl;
+  std::cout << "m_odom.rpy_deg [r,p,y]         = [" << mCurRpy_deg.getX() << \
+    ", \t" << mCurRpy_deg.getY() << ", \t" << mCurRpy_deg.getZ() << "]" << std::endl;
+  std::cout << "m_odom.rpy_rate_dps [r,p,y]    = [" << mCurRpyRate_rps.getX() *const_R2D() << \
+    ", \t" << mCurRpyRate_rps.getY() *const_R2D() << ", \t" << mCurRpyRate_rps.getZ() *const_R2D() << "]" << std::endl;
+  std::cout << std::endl;
+  return;
+}
+
+void Px4Drone::showGoalAction(const ros::TimerEvent& event_) const {
+  ROS_INFO_ONCE_NAMED("px4drone", "[showGoalAction] showGoalAction Turn On");
+
+  std::cout << std::endl;
+  std::cout << "\t[Px4Drone] GoalAction\t(/GoalAction)" << std::endl;
+  std::cout << "goal_service   = [" << mGoalService << std::endl;
+  std::cout << "goal [x,y,z,r] = [" << mGoalX << ", \t" << mGoalY << ", \t" << \
+    mGoalZ << ", \t" << mGoalR << "]" << std::endl;
+  std::cout << std::endl;
+  return;
+}
+
+void Px4Drone::pubRvizTopics(const ros::TimerEvent& event_) const {
+  ROS_INFO_ONCE_NAMED("px4drone", "[pubRvizTopics] pubRvizTopics Turn On");
+
+  static nav_msgs::Path uavPath;
+  geometry_msgs::PoseStamped curPos;
+  curPos.pose = mOdom.pose.pose;
+  uavPath.header.frame_id = "map";
+  uavPath.poses.push_back(curPos);
+  mUavPath_pub.publish(uavPath);
+
+  visualization_msgs::Marker uavPos;
+  uavPos.type = visualization_msgs::Marker::CUBE;
+  uavPos.header.frame_id = "map";
+  uavPos.scale.x = uavPos.scale.y = uavPos.scale.z = 0.3;
+  uavPos.color.r = 0.2;
+  uavPos.color.g = 1.0;
+  uavPos.color.b = 0.2;
+  uavPos.color.a = 1.0;
+  uavPos.pose = mOdom.pose.pose;
+  uavPos.ns = "uav";
+  mUavPos_pub.publish(uavPos);
   return;
 }
 
@@ -602,7 +648,7 @@ void Px4Drone::doMission(int goalService_, double goalX_, double goalY_, double 
         // set POSCTL Mode
         // if (!(mState.mode == "POSCTL") && (mState.armed == false) && \
         //   (mSystemStatusVector[static_cast<int>(mState.system_status)] == "STANDBY")) {
-        if (!(mState.mode == "POSCTL") && (mState.armed == false) {
+        if (!(mState.mode == "POSCTL") && (mState.armed == false)) {
           this->setPosctl();
         }
 
@@ -722,31 +768,7 @@ void Px4Drone::doMission(int goalService_, double goalX_, double goalY_, double 
   return;
 }
 
-void Px4Drone::pubRvizTopics(void) const {
-  if (mPubRvizTopics == true) {
-    ROS_INFO_ONCE_NAMED("px4drone", "[pubRvizTopics] pubRvizTopics Turn On");
-
-    static nav_msgs::Path uavPath;
-    geometry_msgs::PoseStamped curPos;
-    curPos.pose = mOdom.pose.pose;
-    uavPath.header.frame_id = "map";
-    uavPath.poses.push_back(curPos);
-    mUavPath_pub.publish(uavPath);
-
-    visualization_msgs::Marker uavPos;
-    uavPos.type = visualization_msgs::Marker::CUBE;
-    uavPos.header.frame_id = "map";
-    uavPos.scale.x = uavPos.scale.y = uavPos.scale.z = 0.3;
-    uavPos.color.r = 0.2;
-    uavPos.color.g = 1.0;
-    uavPos.color.b = 0.2;
-    uavPos.color.a = 1.0;
-    uavPos.pose = mOdom.pose.pose;
-    uavPos.ns = "uav";
-    mUavPos_pub.publish(uavPos);
-  }
-  else {
-    ROS_INFO_ONCE_NAMED("px4drone", "[pubRvizTopics] pubRvizTopics Turn Off");
-  }
-  return;
+void Px4Drone::run(void) {
+    // px4drone.doMission(23, 1, 2, 3, 45);
+    this->doMission(this->getGoalService(), this->getGoalX(), this->getGoalY(), this->getGoalZ(), this->getGoalR());
 }

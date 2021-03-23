@@ -8,20 +8,28 @@ Px4_Drone:
 
 
   USER:
-    SHOW_STATE: False
-    # (False - True) False
+    SHOW_GUIDE: True
+    # (False - True) True
+    # Show User GUIDE once at the beginning
+
+    SHOW_STATE: 1.0
+    # (0.0 - ) 1.0 [Hz]
+    # [0.0] Stop  [#] Run # Hz
     # Show State (mavros_msgs::State)
 
-    SHOW_ODOM: False
-    # (False - True) False
+    SHOW_ODOM: 1.0
+    # (0.0 - ) 1.0 [Hz]
+    # [0.0] Stop  [#] Run # Hz
     # Show Odometry ( nav_msgs::Odometry)
 
-    SHOW_GOAL_ACTION: False
-    # (False - True) False
+    SHOW_GOAL_ACTION: 1.0
+    # (0.0 - ) 1.0 [Hz]
+    # [0.0] Stop  [#] Run # Hz
     # Show GoalAction (std_msgs::Float32MultiArray)
 
-    PUB_RVIZ_TOPICS: False
-    # (False - True) False
+    PUB_RVIZ_TOPICS: 20.0
+    # (0.0 - ) 20.0 [Hz]
+    # [0.0] Stop  [#] Run # Hz
     # Publish RViz Topics (nav_msgs::Path, visualization_msgs::Marker)
 
     ENABLE_AUTO_TAKEOFF: True
