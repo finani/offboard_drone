@@ -118,10 +118,10 @@ class Px4Drone {
   double mGoalR;
   float mRosRate;
   bool mShowGuide;
-  float mShowState;
-  float mShowOdom;
-  float mShowGoalAction;
-  float mPubRvizTopics;
+  float mShowStateRate;
+  float mShowOdomRate;
+  float mShowGoalActionRate;
+  float mPubRvizTopicsRate;
   bool mEnableAutoTakeoff;
   bool mEnableCustomGain;
 

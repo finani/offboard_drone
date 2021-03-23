@@ -18,10 +18,10 @@ Px4Drone::Px4Drone(ros::NodeHandle *nh_)
     mGoalR(0),
     mRosRate(20.0),
     mShowGuide(true),
-    mShowState(1.0),
-    mShowOdom(1.0),
-    mShowGoalAction(1.0),
-    mPubRvizTopics(20.0),
+    mShowStateRate(1.0),
+    mShowOdomRate(1.0),
+    mShowGoalActionRate(1.0),
+    mPubRvizTopicsRate(20.0),
     mEnableAutoTakeoff(false),
     mEnableCustomGain(false)
 {
@@ -43,19 +43,19 @@ Px4Drone::Px4Drone(ros::NodeHandle *nh_)
 
   nh_->getParam("/Px4_Drone/ROS/ROS_RATE", mRosRate);
   nh_->getParam("/Px4_Drone/USER/SHOW_GUIDE", mShowGuide);
-  nh_->getParam("/Px4_Drone/USER/SHOW_STATE", mShowState);
-  nh_->getParam("/Px4_Drone/USER/SHOW_ODOM", mShowOdom);
-  nh_->getParam("/Px4_Drone/USER/SHOW_GOAL_ACTION", mShowGoalAction);
-  nh_->getParam("/Px4_Drone/USER/PUB_RVIZ_TOPICS", mPubRvizTopics);
+  nh_->getParam("/Px4_Drone/USER/SHOW_STATE_RATE", mShowStateRate);
+  nh_->getParam("/Px4_Drone/USER/SHOW_ODOM_RATE", mShowOdomRate);
+  nh_->getParam("/Px4_Drone/USER/SHOW_GOAL_ACTION_RATE", mShowGoalActionRate);
+  nh_->getParam("/Px4_Drone/USER/PUB_RVIZ_TOPICS_RATE", mPubRvizTopicsRate);
   nh_->getParam("/Px4_Drone/USER/ENABLE_AUTO_TAKEOFF", mEnableAutoTakeoff);
   nh_->getParam("/Px4_Drone/USER/ENABLE_CUSTOM_GAIN", mEnableCustomGain);
   nh_->getParam("/Px4_Drone/MAVROS/REVERSE_THRUST", mReverseThrust);
 
-  if (mShowGuide == true)         mShowGuide_timer = nh_->createTimer(ros::Duration(1.0), &Px4Drone::showGuide, this, true);
-  if (!(mShowState == 0.0))       mShowState_timer = nh_->createTimer(ros::Duration(1.0/mShowState), &Px4Drone::showState, this);
-  if (!(mShowOdom == 0.0))        mShowOdom_timer = nh_->createTimer(ros::Duration(1.0/mShowOdom), &Px4Drone::showOdom, this);
-  if (!(mShowGoalAction == 0.0))  mShowGoalAction_timer = nh_->createTimer(ros::Duration(1.0/mShowGoalAction), &Px4Drone::showGoalAction, this);
-  if (!(mPubRvizTopics == 0.0))   mPubRvizTopics_timer = nh_->createTimer(ros::Duration(1.0/mPubRvizTopics), &Px4Drone::pubRvizTopics, this);
+  if (mShowGuide == true)             mShowGuide_timer = nh_->createTimer(ros::Duration(1.0), &Px4Drone::showGuide, this, true);
+  if (!(mShowStateRate == 0.0))       mShowState_timer = nh_->createTimer(ros::Duration(1.0/mShowStateRate), &Px4Drone::showState, this, false);
+  if (!(mShowOdomRate == 0.0))        mShowOdom_timer = nh_->createTimer(ros::Duration(1.0/mShowOdomRate), &Px4Drone::showOdom, this, false);
+  if (!(mShowGoalActionRate == 0.0))  mShowGoalAction_timer = nh_->createTimer(ros::Duration(1.0/mShowGoalActionRate), &Px4Drone::showGoalAction, this, false);
+  if (!(mPubRvizTopicsRate == 0.0))   mPubRvizTopics_timer = nh_->createTimer(ros::Duration(1.0/mPubRvizTopicsRate), &Px4Drone::pubRvizTopics, this, false);
 
   nh_->getParam("/Px4_Drone/Commander/COM_ARM_MAG_ANG", mArmMagErr_deg);
   nh_->getParam("/Px4_Drone/Commander/COM_RC_OVERRIDE_AUTO", mAutoOverride);
