@@ -1,0 +1,262 @@
+# http://docs.px4.io/master/en/advanced_config/parameter_reference.html
+
+Px4_Drone:
+  ROS:
+    ROS_RATE:              50
+    # (0 - )               20 [Hz]
+    # Ros rate (loop rate)
+
+
+  USER:
+    SHOW_GUIDE:          True
+    # (False - True)     True
+    # Show User GUIDE once at the beginning
+
+    SHOW_STATE_RATE:        1.0
+    # (0.0 - )              1.0 [Hz]
+    # [0.0] Stop  [#] Run # Hz
+    # Show State (mavros_msgs::State)
+
+    SHOW_ODOM_RATE:         1.0
+    # (0.0 - )              1.0 [Hz]
+    # [0.0] Stop  [#] Run # Hz
+    # Show Odometry ( nav_msgs::Odometry)
+
+    SHOW_GOAL_ACTION_RATE:  1.0
+    # (0.0 - )              1.0 [Hz]
+    # [0.0] Stop  [#] Run # Hz
+    # Show GoalAction (std_msgs::Float32MultiArray)
+
+    PUB_RVIZ_TOPICS_RATE:  20.0
+    # (0.0 - )             20.0 [Hz]
+    # [0.0] Stop  [#] Run # Hz
+    # Publish RViz Topics (nav_msgs::Path, visualization_msgs::Marker)
+
+    ENABLE_AUTO_TAKEOFF: True
+    # (False - True)    False
+    # Enable Auto Takeoff. It will set false after auto takeoff
+
+    ENABLE_CUSTOM_GAIN: True
+    # (False - True)    False
+    # Enable gain parameters from this yaml file.
+
+
+  MAVROS:
+    REVERSE_THRUST: False
+    # (False - True) False
+    # Enable bidirectional thrust
+
+
+  Commander:
+    COM_ARM_IMU_ACC:        0.7
+    # (0.1 - 1.0)           0.7 [mpss]
+    # Maximum accelerometer inconsistency between IMU units that will allow arming
+
+    COM_ARM_IMU_GYR:        0.25
+    # (0.02 - 0.3)          0.25 [rps]
+    # Maximum rate gyro inconsistency between IMU units that will allow arming
+
+    COM_ARM_MAG_ANG:       45
+    # (3 - 180)            30 [deg]
+    # Maximum magnetic field inconsistency between units that will allow arming Set -1 to disable the check
+
+    # COM_RC_OVERRIDE (2 bits)
+    COM_RC_OVERRIDE_AUTO: True
+    # (False - True) True
+    COM_RC_OVERRIDE_OFFBOARD: True
+    # (False - True) False
+    # Enable RC stick override of auto and/or offboard modes
+
+
+  Geofence:
+    GF_ACTION:              2
+    # (0 - 5)               1
+    # [0] None  [1] Warning [2] Hold mode [3] Return mode [4] Terminate [5] Land mode
+    # Geofence violation action
+
+    GF_MAX_HOR_DIST:        0.0
+    # (0 - 10000)           0.0
+    # [0.0] Disable
+
+    GF_MAX_VER_DIST:        0.0
+    # (0 - 10000)           0.0
+    # [0.0] Disable
+
+
+  Land_Detector:
+    LNDMC_ALT_MAX:         50.0
+    # (-1 - 10000)         -1.0
+    # [-1.0] Disable
+    # Maximum altitude for multicopters
+
+
+  Mission:
+    MIS_TAKEOFF_ALT:        3.0
+    # (0.0 - 80.0)          2.5 [m]
+    # Take-off altitude
+
+
+  Multicopter_Attitude_Control:
+    MC_PITCHRATE_MAX:     220.0
+    # (0.0 - 1800.0, 5)   220.0 [rad/s]
+    # Max pitch rate
+    # Limit for pitch rate in manual and auto modes (except acro)
+
+    MC_PITCH_P:             6.5
+    # (0.0 - 12.0, 0.1)     6.5 [Hz]
+    # Pitch P gain
+
+    MC_ROLLRATE_MAX:      220.0
+    # (0.0 - 1800.0, 5)   220.0 [rad/s]
+    # Max roll rate
+    # Limit for roll rate in manual and auto modes (except acro)
+
+    MC_ROLL_P:              6.5
+    # (0.0 - 12.0, 0.1)     6.5 [Hz]
+    # Roll P gain
+
+    MC_YAWRATE_MAX:       200.0
+    # (0.0 - 1800.0, 5)   200.0 [rad/s]
+    # Max yaw rate
+
+    MC_YAW_P:               2.8
+    # (0.0 - 5.0, 0.1)      2.8 [Hz]
+    # Yaw P gain
+
+    MC_YAW_WEIGHT:          0.4
+    # (0.0 - 1.0, 0.1)      0.4 [Hz]
+    # Yaw weight
+    # Deprioritizing yaw compared to roll and pitch in non-linear attitude control
+
+
+  Multicopter_Position_Control:
+    MPC_TKO_SPEED:          1.5
+    # (1.0 - 5.0)           1.5 [mps]
+    # Takeoff climb rate
+
+    MPC_LAND_SPEED:         1.0
+    # (0.6 - )              0.7 [mps]
+    # Landing descend rate
+
+    MPC_XY_VEL_MAX:        12.0
+    # (0.0 - 20.0)         12.0 [mps]
+    # Maximum horizontal velocity
+
+    MPC_Z_VEL_MAX_UP:       3.0
+    # (0.5 - 8.0)           3.0 [mps]
+    # Maximum vertical ascent velocity
+
+    MPC_Z_VEL_MAX_DN:       3.0
+    # (0.5 - 4.0)           1.0 [mps]
+    # Maximum vertical descent velocity
+
+
+    MPC_XY_P:               1.2
+    # (0.0 - 2.0)           0.95
+    # Proportional gain for horizontal position error
+
+    MPC_Z_P:                2.4
+    # (0.0 - 1.5)           1.0
+    # Proportional gain for vertical position error
+
+
+    MPC_XY_VEL_P_ACC:       3.0
+    # (1.2 - 3.0)           1.8
+    # defined as correction acceleration in m/s^2 per m/s velocity error
+
+    MPC_XY_VEL_I_ACC:       0.7
+    # (0.0 - 60.0)          0.4
+    # defined as correction acceleration in m/s^2 per m velocity integral Non-zero value
+
+    MPC_XY_VEL_D_ACC:       0.1
+    # (0.1 - 2.0)           0.2
+    # defined as correction acceleration in m/s^2 per m/s^2 velocity derivative
+
+
+    MPC_Z_VEL_P_ACC:        4.0
+    # (2.0 - 8.0)           4.0
+    # defined as correction acceleration in m/s^2 per m/s velocity error
+
+    MPC_Z_VEL_I_ACC:        2.0
+    # (0.2 - 2.0)           2.0
+    # defined as correction acceleration in m/s^2 per m velocity integral Non-zero value
+
+    MPC_Z_VEL_D_ACC:        0.0
+    # (0.0 - 2.0)           0.0
+    # defined as correction acceleration in m/s^2 per m/s^2 velocity derivative
+
+
+  Multicopter_Rate_Control:
+    MC_PITCHRATE_K:         1.0
+    # (0.01 - 5.0, 0.0005)  1.0
+    # Pitch rate controller gain
+
+    MC_PITCHRATE_P:         0.15
+    # (0.01 - 0.6, 0.01)    0.15
+    # Pitch rate P gain
+
+    MC_PITCHRATE_I:         0.2
+    # (0.01 - , 0.01)       0.2
+    # Pitch rate I gain
+
+    MC_PITCHRATE_D:         0.003
+    # (0.01 - , 0.0005)     0.003
+    # Pitch rate D gain
+
+    MC_PITCHRATE_FF:        0.0
+    # (0.0 - )              0.0
+    # Pitch rate feedforward
+
+    MC_PR_INT_LIM:          0.30
+    # (0.0 - , 0.01)        0.30
+    # Pitch rate integrator limit
+
+
+    MC_ROLLRATE_K:          1.0
+    # (0.01 - 5.0, 0.0005)  1.0
+    # Roll rate controller gain
+    
+    MC_ROLLRATE_P:          0.15
+    # (0.01 - 0.6, 0.01)    0.15
+    # Roll rate P gain
+
+    MC_ROLLRATE_I:          0.2
+    # (0.01 - , 0.01)       0.2
+    # Roll rate I gain
+
+    MC_ROLLRATE_D:          0.003
+    # (0.01 - , 0.0005)     0.003
+    # Roll rate D gain
+
+    MC_ROLLRATE_FF:         0.0
+    # (0.0 - )              0.0
+    # Roll rate feedforward
+
+    MC_RR_INT_LIM:          0.30
+    # (0.0 - , 0.01)        0.30
+    # Roll rate integrator limit
+
+
+    MC_YAWRATE_K:           1.0
+    # (0.01 - 5.0, 0.0005)  1.0
+    # Yaw rate controller gain
+    
+    MC_YAWRATE_P:           0.2
+    # (0.01 - 0.6, 0.01)    0.2
+    # Yaw rate P gain
+
+    MC_YAWRATE_I:           0.1
+    # (0.01 - , 0.01)       0.1
+    # Yaw rate I gain
+
+    MC_YAWRATE_D:           0.0
+    # (0.01 - , 0.01)       0.0
+    # Yaw rate D gain
+
+    MC_YAWRATE_FF:          0.0
+    # (0.0 - )              0.0
+    # Yaw rate feedforward
+
+    MC_YR_INT_LIM:          0.30
+    # (0.0 - , 0.01)        0.30
+    # Yaw rate integrator limit

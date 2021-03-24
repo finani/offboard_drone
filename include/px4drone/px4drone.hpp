@@ -25,6 +25,7 @@ constexpr double const_D2R() { return const_pi() / 180.0; }
 
 class Px4Drone {
  public:
+  Px4Drone() = default;
   Px4Drone(ros::NodeHandle *nh_);
   ~Px4Drone() = default;
 
@@ -62,23 +63,25 @@ class Px4Drone {
   bool goLanding(void);
   bool goReturn(void);
   bool goHold(void);
-  void goForce(double xForward_N_, double y_Left_N_, double z_Up_N_);
-  void goAccel(double xForward_mpss_, double y_Left_mpss_, double z_Up_mpss_);
-  void goAngularVelocity(double xForward_RollRight_dps_, double yLeft_PitchForward_dps_, double zUp_YawCCW_dps_, double zUpThrust_percent_);
-  void goAttitude(double xPitchForward_deg_, double yRollRight_deg_, double zYawCCW_deg_, double zUpThrust_percent_);
-  void goVelocity(double xEast_mps_, double yNorth_mps_, double zUp_mps_, double headingCCW_dps_);
-  void goVelocityBody(double xForward_mps_, double yLeft_mps_, double zUp_mps_, double headingCCW_dps_);
-  void goPosition(double xEast_m_, double yNorth_m_, double zUp_m_, double headingCCW_deg_);
+  void goForce(double xForward_N_, double yLeft_N_, double zUp_N_, ros::NodeHandle *nh_);
+  void goAcceleration(double xForward_mpss_, double yLeft_mpss_, double zUp_mpss_, ros::NodeHandle *nh_);
+  void goAngularVelocity(double xForward_RollRight_dps_, double yLeft_PitchForward_dps_, double zUp_YawCCW_dps_, double zUpThrust_percent_) const;
+  void goAttitude(double xPitchForward_deg_, double yRollRight_deg_, double zYawCCW_deg_, double zUpThrust_percent_) const;
+  void goVelocity(double xEast_mps_, double yNorth_mps_, double zUp_mps_, double headingCCW_dps_) const;
+  void goVelocityBody(double xForward_mps_, double yLeft_mps_, double zUp_mps_, double headingCCW_dps_) const;
+  void goPosition(double xEast_m_, double yNorth_m_, double zUp_m_, double headingCCW_deg_) const;
 
   bool doInitialization(ros::NodeHandle *nh_, ros::Rate *rate_);
-  void doMission(int goalService_, double goalX_, double goalY_, double goalZ_, double goalR_);
+  void doMission(int goalService_, double goalX_, double goalY_, double goalZ_, double goalR_, ros::NodeHandle *nh_);
 
-  void run(void);
+  void run(ros::NodeHandle *nh_);
 
  private:
   ros::Subscriber mState_sub;
   ros::Subscriber mOdom_sub;
   ros::Subscriber mGoalAction_sub;
+  ros::Publisher mCmdForce_pub;
+  ros::Publisher mCmdAcc_pub;
   ros::Publisher mCmdRate_pub;
   ros::Publisher mCmdAtt_pub;
   ros::Publisher mCmdVel_pub;
@@ -130,4 +133,6 @@ class Px4Drone {
   bool mAutoOverride;
   bool mOffboardOverride;
   int mGeofenceAction;
+
+  bool mSendForce;
 };

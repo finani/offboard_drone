@@ -19,7 +19,7 @@ int main(int argc, char **argv)
   {
     ROS_INFO_ONCE_NAMED("offboard_node", "\t[offboard_node] main loop start");
 
-    px4drone.run();
+    px4drone.run(&nh);
     
     ros::spinOnce();
     rate.sleep();

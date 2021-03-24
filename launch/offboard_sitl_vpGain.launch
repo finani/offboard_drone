@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<launch>
+    <node name="offboard_node" type="offboard_node" output="screen" pkg="offboard_drone"/>
+    <rosparam command="load" file="$(find offboard_drone)/config/sitl_vpGain.yaml"/>
+</launch>
