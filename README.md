@@ -8,6 +8,9 @@
     - Or You can takeoff using the mavlink shell ```pxh>```
     ```commander takeoff```
 
+# vel/pos gain tuning
+[![px4 sitl vel/pos response (w/, w/o gain tuning](https://img.youtube.com/vi/QMwc--2zklE/0.jpg)](https://www.youtube.com/watch?v=QMwc--2zklE)
+
 # Failsafe Sequence
 - ROS_ASSERT_CMD
 
