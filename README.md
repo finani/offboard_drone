@@ -8,10 +8,15 @@
     - Or You can takeoff using the mavlink shell ```pxh>```
     ```commander takeoff```
 
+# How to set offboard control
+- Youtube Video
+
+[![[px4 sitl] How to set offboard control without manual stick input](https://img.youtube.com/vi/Tuyt5qW3Nhs/0.jpg)](https://www.youtube.com/watch?v=Tuyt5qW3Nhs)
+
 # vel/pos gain tuning
 - Youtube Video
 
-[![px4 sitl vel/pos response (w/, w/o gain tuning](https://img.youtube.com/vi/QMwc--2zklE/0.jpg)](https://www.youtube.com/watch?v=QMwc--2zklE)
+[![[px4 sitl] vel/pos response (w/, w/o gain tuning](https://img.youtube.com/vi/QMwc--2zklE/0.jpg)](https://www.youtube.com/watch?v=QMwc--2zklE)
 
 # Failsafe Sequence
 - ROS_ASSERT_CMD
