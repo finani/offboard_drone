@@ -40,6 +40,10 @@ Px4_Drone:
     # (False - True)    False
     # Enable gain parameters from this yaml file.
 
+    ENABLE_AUTO_SET_OFFBOARD: False
+    # (False - True)    False
+    # Enable set OFFBOARD Mode autonomously
+
 
   MAVROS:
     REVERSE_THRUST: False

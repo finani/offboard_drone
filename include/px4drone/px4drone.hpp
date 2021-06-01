@@ -127,6 +127,7 @@ class Px4Drone {
   float mPubRvizTopicsRate;
   bool mEnableAutoTakeoff;
   bool mEnableCustomGain;
+  bool mEnableAutoSetOffboard;
 
   bool mReverseThrust;
   int mArmMagErr_deg;
